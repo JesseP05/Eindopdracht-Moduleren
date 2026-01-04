@@ -1,0 +1,13 @@
+status_code,description
+IC,Investigation Continues
+AA,Adult Arrest
+JA,Juvenile Arrest
+AO,Adult Other
+JO,Juvenile Other
+CC,Cleared by Citation
+AAO,Adult Arrest - Out of Custody
+JAI,Juvenile Arrest - In Custody
+JF,Juvenile - Follow-up / No Arrest
+UN,Unknown
+JOI,Juvenile Other - In Custody
+JOO,Juvenile Other - Out of Custody

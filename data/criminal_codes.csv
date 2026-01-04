@@ -1,0 +1,170 @@
+Class,Criminal Code,Description
+Homicide,110,HOMICIDE-CRIMINAL/MURDER
+Homicide,113,"MANSLAUGHTER, NEGLIGENCE"
+Rape,121,"RAPE, FORCIBLE (any age, nonconsensual sexual intercourse)"
+Rape,122,"RAPE, ATTEMPTED"
+Rape,815,SEXUAL PENETRATION W/FOREIGN OBJECT
+Rape,820,"ORAL COPULATION (copulating mouth of one person with sex organ or anus of another)"
+Rape,821,SODOMY (sexual contact between penis of one person to the anus of another)
+Robbery,210,ROBBERY (taking property of another by means of force or fear)
+Robbery,220,ROBBERY - ATTEMPTED
+Aggravated Assault,230,"AGGRAVATED ASSAULT (including poisoning, maiming, mayhem, assault with explosives, and assault with disease)"
+Aggravated Assault,231,ADW AGAINST POLICE OFFICER
+Aggravated Assault,235,CHILD ABUSE (Physical) - Aggravated Assault
+Aggravated Assault,236,INTIMATE PARTNER - Aggravated Assault
+Aggravated Assault,250,"SHOTS FIRED (Discharge of firearms) at MOVING VEHICLE, TRAIN or AIRCRAFT"
+Aggravated Assault,251,SHOTS FIRED INHABITED DWELLING
+Aggravated Assault,761,"BRANDISHING WEAPON, EXHIBITING DEADLY WEAPON"
+Aggravated Assault,926,TRAIN WRECKING
+Burglary,310,BURGLARY (entry of structure w/intent to commit theft or a felony) Includes vessels
+Burglary,320,BURGLARY - ATTEMPTED
+Motor Vehicle Theft,510,"VEHICLE, STOLEN"
+Motor Vehicle Theft,520,"VEHICLE, ATTEMPTED STOLEN"
+Motor Vehicle Theft,522,"VEHICLE, STOLEN - OTHER (Motorized: Scooter, Wheelchair, or Bicycle)"
+Motor Vehicle Theft,433,DRIVING WITHOUT OWNER CONSENT (DWOC)
+Burglary/Theft from Vehicle,330,BURGLARY FROM VEHICLE
+Burglary/Theft from Vehicle,331,THEFT FROM VEHICLE - GRAND ($950.01 & OVER)
+Burglary/Theft from Vehicle,410,BURGLARY FROM VEHICLE - ATTEMPTED
+Burglary/Theft from Vehicle,420,THEFT FROM VEHICLE - PETTY ($950 & under)
+Burglary/Theft from Vehicle,421,THEFT FROM VEHICLE - ATTEMPTED
+Theft From Person,350,THEFT FROM PERSON
+Theft From Person,351,PURSESNATCH (form of grand theft person)
+Theft From Person,352,PICKPOCKET - PICKPURSE (form of grand theft person)
+Theft From Person,353,DRUNKROLL (form of grand theft person)
+Theft From Person,450,THEFT FROM PERSON - ATTEMPTED
+Theft From Person,451,PURSESNATCH-ATTEMPTED (form of grand theft person)
+Theft From Person,452,PICKPOCKET - ATTEMPTED (form of grand theft person)
+Theft From Person,453,DRUNKROLL - ATTEMPTED (form of Grand theft person)
+Other Theft,341,"THEFT-GRAND (plain theft-grand) $950.01 & OVER (or $100 if fowl, livestock, produce, etc.)"
+Other Theft,343,SHOPLIFTING - GRAND THEFT ($950.01 & OVER)
+Other Theft,345,DISHONEST EMPLOYEE - GRAND THEFT
+Other Theft,440,THEFT-PETTY (plain theft-petty) $950 & under
+Other Theft,441,THEFT - ATTEMPTED (plain theft-attempted)
+Other Theft,442,SHOPLIFTING-PETTY THEFT ($950 & under)
+Other Theft,443,SHOPLIFTING-ATTEMPTED
+Other Theft,444,DISHONEST EMPLOYEE - PETTY THEFT
+Other Theft,445,DISHONEST EMPLOYEE - ATTEMPTED
+Other Theft,470,TILL TAP-GRAND THEFT ($950.01 & OVER)
+Other Theft,471,TILL TAP-PETTY THEFT ($950 & under)
+Other Theft,472,TILL TAP - ATTEMPTED
+Other Theft,473,THEFT FROM COIN MACHINE-GRAND ($950.01 & OVER)
+Other Theft,474,THEFT FROM COIN MACHINE - PETTY ($950 & under)
+Other Theft,475,THEFT FROM COIN MACHINE-ATTEMPTED
+Other Theft,480,BICYCLE-STOLEN
+Other Theft,485,BICYCLE - ATTEMPTED STOLEN (impounded bicycle)
+Other Theft,487,BOAT-STOLEN
+Other Theft,491,BOAT-ATTEMPTED STOLEN
+Arson,648,ARSON
+Kidnap,910,KIDNAPPING
+Kidnap,920,KIDNAPPING - ATTEMPTED (stealing any person & carrying them to another location)
+Kidnap,921,HUMAN TRAFFICKING-INVOLUNTARY SERVITUDE
+Other Sex Crime,810,UNLAWFUL SEX (includes mutual consent)
+Other Sex Crime,812,"CRIME AGAINST CHILD (13 & under, 14-15 & Susp 10 Years Older)"
+Other Sex Crime,813,CHILD ANNOYING (17 yrs & under)
+Other Sex Crime,814,CHILD PORNOGRAPHY
+Other Sex Crime,822,HUMAN TRAFFICKING COMMERCIAL SEX ACTS
+Other Sex Crime,830,INCEST (sexual acts between blood relations)
+Other Sex Crime,840,"BEASTIALITY (crimes against nature, sex assault animals)"
+Other Sex Crime,850,INDECENT EXPOSURE (exposing private parts in public view)
+Other Sex Crime,860,BATTERY WITH SEX CONNOTATION/OTHER SEX OFFENSE
+Other Sex Crime,760,LEWD/LASCIVIOUS ACTS WITH CHILD
+Other Sex Crime,762,LEWD CONDUCT
+Other Sex Crime,932,PEEPING TOM
+Simple Assault,622,BATTERY ON FIREMAN
+Simple Assault,623,BATTERY ON POLICE OFFICER
+Simple Assault,624,BATTERY - MISDEMEANOR (unlawful use of force or violence on another)
+Simple Assault,625,"OTHER MISDEMEANOR ASSAULT (Assault & Attempt, no weapon or injuries, i.e. spitting)"
+Simple Assault,626,INTIMATE PARTNER - Simple Assault / Battery
+Simple Assault,627,CHILD ABUSE (Physical) - Simple Assault
+Simple Assault,647,THROWING OBJECT AT MOVING VEHICLE
+Simple Assault,763,STALKING
+Simple Assault,437,RESISTING ARREST
+Simple Assault,435,LYNCHING
+Simple Assault,436,LYNCHING - ATTEMPTED (taking a person under lawful custody of a peace officer)
+Simple Assault,928,THREATENING PHONE CALLS/LETTERS
+Simple Assault,930,CRIMINAL THREATS (Changed from Verbal Threats and Terrorist Threats)
+Simple Assault,237,CHILD ENDANGERING/NEGLECT (see 300 W.I.C.)
+Simple Assault,870,CHILD ABANDONMENT
+Simple Assault,922,CHILD STEALING (custody dispute-parent is the victim)
+Weapons,753,SHOTS FIRED (Discharge of Firearms)
+Weapons,755,BOMB THREAT
+Weapons,756,BOMB OR POSS/MANUFACTURING DESTRUCTIVE DEVICE
+ID Theft,354,IDENTITY THEFT/THEFT OF IDENTITY
+Fraud,347,INSURANCE FRAUD/GRAND THEFT
+Fraud,349,AUTO REPAIR/GRAND THEFT
+Fraud,446,AUTO REPAIR/PETTY THEFT
+Fraud,651,"DOCUMENT, OTHER WORTHLESS $200.01 and over"
+Fraud,652,"DOCUMENT, OTHER WORTHLESS under $200"
+Fraud,653,"CREDIT CARDS, FRAUD USE $950.01 & OVER"
+Fraud,654,"CREDIT CARDS, FRAUD USE $950 & under"
+Fraud,662,BUNCO GRAND THEFT
+Fraud,664,BUNCO-PETTY THEFT
+Fraud,666,"BUNCO ATTEMPTED (type of theft, obtain property by trick or scheme)"
+Fraud,950,DEFRAUDING INNKEEPER/THEFT OF SERVICES ($950.01 & OVER)
+Fraud,951,DEFRAUDING INNKEEPER/THEFT OF SERVICES ($950 & under)
+Forgery/Counterfeiting,649,"DOCUMENT, FORGED OR STOLEN"
+Forgery/Counterfeiting,660,COUNTERFEITING
+Embezzlement,668,EMBEZZLEMENT - GRAND THEFT (to appropriate fraudulently entrusted property)
+Embezzlement,670,EMBEZZLEMENT-PETTY THEFT
+Pimping/Pandering,805,PIMPING (gets earnings from prostitutes)
+Pimping/Pandering,806,PANDERING (procures another for prostitution)
+Disorderly Conduct,432,BLOCKING DOOR INDUCTION CENTER
+Disorderly Conduct,880,DISRUPTIVE PRESENCE SCHOOL/COLLEGE
+Disorderly Conduct,882,INCITING RIOT
+Disorderly Conduct,884,FAILURE TO DISPERSE
+Disorderly Conduct,886,DISTURBING THE PEACE
+Vandalism,740,VANDALISM ($400 & over)
+Vandalism,745,VANDALISM (less than $400)
+Part II Crimes (Misc),434,FALSE IMPRISONMENT
+Part II Crimes (Misc),438,RECKLESS DRIVING
+Part II Crimes (Misc),439,FALSE POLICE REPORT
+Part II Crimes (Misc),661,COMPUTER CRIMES*
+Part II Crimes (Misc),845,SEX OFFENDER REGISTRANT OUT OF COMPLIANCE
+Part II Crimes (Misc),865,"DRUGS/LIQUOR, FURNISH/OFFER TO MINOR/HARBORING MINOR"
+Part II Crimes (Misc),888,TRESPASSING/LOITERING ON PRIVATE PROPERTY
+Part II Crimes (Misc),890,FAILURE TO YIELD
+Part II Crimes (Misc),900,VIOLATION OF COURT ORDER
+Part II Crimes (Misc),901,VIOLATION OF RESTRAINING ORDER
+Part II Crimes (Misc),902,VIOLATION OF TEMPORARY RESTRAINING ORDER
+Part II Crimes (Misc),903,CONTEMPT OF COURT
+Part II Crimes (Misc),904,FIREARMS EMERGENCY PROTECTIVE ORDER (FIREARMS EPO)
+Part II Crimes (Misc),905,FIREARMS TEMPORARY RESTRAINING ORDER (TEMP FIREARMS RO)
+Part II Crimes (Misc),906,FIREARMS RESTRAINING ORDER (FIREARMS RO)
+Part II Crimes (Misc),924,"TELEPHONE PROPERTY, damaged/injury to"
+Part II Crimes (Misc),931,"REPLICA FIREARMS (Sale, Display, Manufacture or Distribute)"
+Part II Crimes (Misc),933,PROWLER
+Part II Crimes (Misc),940,EXTORTION (obtaining property of another with consent by wrongful use of force or fear)
+Part II Crimes (Misc),942,BRIBERY (something given or promised for an illegal act)
+Part II Crimes (Misc),943,CRUELTY TO ANIMALS
+Part II Crimes (Misc),944,CONSPIRACY (two or more conspire to commit any crime)
+Part II Crimes (Misc),946,OTHER MISCELLANEOUS CRIME
+Part II Crimes (Misc),948,BIGAMY
+Part II Crimes (Misc),949,ILLEGAL DUMPING
+Part II Crimes (Misc),952,ABORTION/ILLEGAL
+Part II Crimes (Misc),954,"CONTRIBUTING (encourage person under 18 to come within provisions of 600, 602 W.I.C.)"
+Part II Crimes (Misc),956,ANNOYING/LEWD/OBSCENE PHONE CALLS/LETTERS
+Non-Crimes,234,SUSPECTED CHILD ABUSE REPORT (S.C.A.R)
+Non-Crimes,521,VEHICLE RECOVERED
+Non-Crimes,430,Property Missing From Recovered Vehicle - Grand
+Non-Crimes,431,Property Missing From Recovered Vehicle - Petty
+Non-Crimes,486,BICYCLE RECOVERED
+Non-Crimes,492,BOAT-RECOVERED
+Non-Crimes,846,SEX OFFENDER REGISTRANT INCIDENT - PUBLIC NOTIFICATION
+Non-Crimes,945,HOMICIDE - JUSTIFIABLE
+Non-Crimes,970,SUICIDE
+Non-Crimes,972,SUICIDE ATTEMPTED
+Non-Crimes,975,MENTAL EVALUATION
+Non-Crimes,976,MISSING PERSON - ADULT
+Non-Crimes,978,MISSING PERSON - JUVENILE
+Non-Crimes,979,DEATH REPORT (other than crime/suicide)
+Non-Crimes,980,INJURY REPORT
+Non-Crimes,986,FOUND PERSON (Adult and Juvenile)
+Non-Crimes,990,LOST PROPERTY
+Non-Crimes,993,CHILD ON CHILD SEX INCIDENT
+Non-Crimes,994,UNSPECIFIED SEXUAL ASSAULT INVESTIGATION (NON-CRIME)
+Non-Crimes,995,SUSPICIOUS ACTIVITY REPORT (SAR)
+Non-Crimes,996,LOCATE/RECOVERED LICENSE PLATE
+Non-Crimes,997,TRAFFIC DR#
+Non-Crimes,998,PROPERTY - EVIDENCE DR#/NON-EVIDENCE DR#
+Non-Crimes,999,NON_CRIME (including Temporary Restraining Orders)
+Non-Crimes,111,HOMICIDE - NON UCR (NOT CLASSIFIED AS A HOMICIDE PER UCR)
