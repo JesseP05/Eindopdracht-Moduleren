@@ -8,7 +8,7 @@ Het project is gefocused op een dataset van de politie van Los Angeles. De datas
 ### Installatie
 Met git en curl (*recommended*):
 ```bash
-git clone github.com/JesseP05/Eindopdracht-Moduleren.git
+git clone https://github.com/JesseP05/Eindopdracht-Moduleren.git
 cd Eindopracht Moduleren
 curl -L -o "data/Crime_Data_from_2020_to_Present.csv" "https://data.lacity.org/api/views/2nrs-mtv8/rows.csv?accessType=DOWNLOAD"
 ```
