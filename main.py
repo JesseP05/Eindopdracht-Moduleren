@@ -2,7 +2,7 @@
 Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
 
 Author: Jesse Postma
-Version: 0.1
+Version: 0.2
 """
 
 
@@ -11,7 +11,24 @@ import pandas as pd
 import helper
 
 
-# def graph_dates():
+def parse_mocodes(cell, map):
+    """Parses a mocode string eg: 1300 0344 1606 2032 to a list of translated mocode(s)
+
+    Args:
+        cell : pandas cell with mocodes
+        map: dictionary for mocode -> discription of the mocode
+
+    Returns:
+        mocodes[str]: Translated values for the mocode(s)
+    """
+    if pd.isna(cell):
+        return cell
+    codes = cell.split(" ")
+    codes = [int(code) for code in codes]
+    translated = [str(map.get(c, c)) for c in codes]
+    mocodes = ' '.join(translated)
+    return mocodes
+
 
 def process_data(files : list[str]):
     """Load and process the data files.
@@ -27,7 +44,7 @@ def process_data(files : list[str]):
     crim_cd_df = pd.read_csv(files[1], engine='pyarrow') # translation for criminal codes into classes
     rep_ds_df = pd.read_csv(files[2], engine='pyarrow') # gives info about bureau, type of unit
     stat_cd_df = pd.read_csv(files[3], engine='pyarrow') # translation for report status codes
-    mcode_df = pd.read_csv(files[4], engine='pyarrow') # information about what has reportedly happened in the event
+    mcode_df = pd.read_csv(files[4], engine='pyarrow', dtype={"MO Code": int}) # information about what has reportedly happened in the event
 
     # Map criminal codes to classified spectrums
     #crim_cd_df['Criminal Code'] = pd.to_numeric(crim_cd_df['Criminal Code'])
@@ -43,9 +60,14 @@ def process_data(files : list[str]):
     lapd_df = helper.dictionary_replace_csv(lapd_df, rep_ds_df, 'REPDIST', 'Authority Type', 'S_TYPE')
     lapd_df = helper.dictionary_replace_csv(lapd_df, stat_cd_df, 'status_code', 'Status', 'description') # adding more info to status description
     
-
-    print(lapd_df['Status'].head())
+    # initialize a lookup map for mocodes
+    mocode_map = dict(zip(mcode_df["MO Code"].astype(int), mcode_df["Description"]))
+    # parse mocodes to readable desription
+    lapd_df["Mocodes Readable"] = lapd_df["Mocodes"].apply(parse_mocodes, args=(mocode_map,))
+    
+    print(mcode_df['MO Code'].head())
     print(lapd_df['Mocodes'].head())
+    print(lapd_df['Mocodes Readable'].head())
 
 def main():
     """

@@ -66,3 +66,7 @@ class DirectoryNotFoundError(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(message)
+
+
+if __name__ == "__main__":
+    print(f"This file {__file__} is not meant to be run directly.")
