@@ -90,7 +90,7 @@ def graph_dates(dates: list[str]):
         except Exception as e:
             print(f"Invalid date format: {date}")
             continue
-    grapher.graph_dates_bar(dates_dict, tick_interval=1, total_years=True, tick_rotation=90)
+    grapher.date_events_plot(dates_dict, average_years=True, tick_rotation=45, heatmap=True, r_window=30)
 
 
 def main():
