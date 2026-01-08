@@ -4,7 +4,10 @@ Dit is de uitwerking voor de eindopracht moduleren door Jesse Postma
 ### Uitleg
 Het project is gefocused op een dataset van de politie van Los Angeles. De dataset is opgebouwd uit incidenten van 2020 tot eind 2025. De dataset bevat een aantal columns met codes die vaag zijn, deze worden automatisch vertaald m.b.v. verschillende andere datasets.
 
-De dataset bestaat uit ruim 1 miljoen rows aan data. De data waarin ik in het bijzonder geinteresseerd ben zijn:
+De dataset bestaat uit ruim 1 miljoen rows aan data. 
+<details>
+<summary><i>De data waarin ik in het bijzonder geinteresseerd in ben:</i></summary>
+
 * DATE OCC
     > Datum waarop het incident heeft plaatsgevonden
 * TIME OCC
@@ -35,7 +38,7 @@ De dataset bestaat uit ruim 1 miljoen rows aan data. De data waarin ik in het bi
     > Latitude van waar het incident heeft plaatsgevonden
 * LON
     > Longitude van waar het incident heeft plaatsgevonden
-
+</details>
 
 ---
 ### Installatie
