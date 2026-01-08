@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 
+# TODO: add variables for labels, titles, colors, etc.
 
 def date_events_plot(date_dict: dict[str, float], average_years : bool = False,
                     tick_rotation: int = 45, heatmap : bool= False, r_window: int = 30):
