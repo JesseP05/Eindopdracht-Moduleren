@@ -1,6 +1,16 @@
 ## Eindopdracht Moduleren
 Dit is de uitwerking voor de eindopracht moduleren door Jesse Postma
 
+- [Eindopdracht Moduleren](#eindopdracht-moduleren)
+  - [Uitleg](#uitleg)
+  - [Installatie](#installatie)
+    - [Maak een virtual environment:](#maak-een-virtual-environment)
+    - [Activate venv (optional):](#activate-venv-optional)
+    - [Install requirements:](#install-requirements)
+    - [Run main.py:](#run-mainpy)
+    - [Handmatig:](#handmatig)
+
+
 ### Uitleg
 Het project is gefocused op een dataset van de politie van Los Angeles. De dataset is opgebouwd uit incidenten van 2020 tot eind 2025. De dataset bevat een aantal columns met codes die vaag zijn, deze worden automatisch vertaald m.b.v. verschillende andere datasets.
 
