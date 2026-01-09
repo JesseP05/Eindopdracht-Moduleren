@@ -11,11 +11,16 @@ def dictionary_replace_csv(main_df, sub_df, tbindex_header, replace_header, repl
 
     Args:
         main_df (DataFrame): The dataframe that the map should be applied to.
+        
         sub_df (DataFrame): The dataframe that contains mapping information.
+        
         tbindex_header (str): The header of the column that the sub_df
+        
         dataframe should be indexed on.
+        
         replace_header (str): The header of the column in main_df
         of which the values will be replaced.
+        
         replacing_header (str, optional): Optional specific interest header.
         Use when only interested in a a,b type situation. Defaults to None.
 
@@ -42,6 +47,8 @@ def validate_project_structure(expected_files: set):
         DirectoryNotFoundError: Error raised if the data dir is not found.
         FileNotFoundError: Error raised if any of the expected files are not found.
     """
+
+    print('Validating project structure...')
     dirpath = os.path.dirname(os.path.realpath(__file__))
     data_dir = dirpath + '/data'
     data_dir_exists = os.path.exists(data_dir)
