@@ -5,3 +5,4 @@ data/Crime_Data_from_2020_to_Present.csv
 sources.txt
 .venv/
 __pycache__/
+debug_out.txt

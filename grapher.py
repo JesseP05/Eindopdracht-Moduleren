@@ -20,9 +20,11 @@ def date_events_plot(
     average_years: bool = False,
     tick_rotation: int = 45,
     heatmap: bool = False,
-    r_window: int = 30,
     heatmap_lbl: str = 'Average daily events',
-    heatmap_title: str = 'Heatmap'
+    heatmap_title: str = 'Heatmap',
+    caption = '',
+    r_window: int = 30,
+    rolling_avg: bool = True
 ):
     """Function that trivializes plotting number of events by date.
 
@@ -30,13 +32,22 @@ def date_events_plot(
         date_dict (dict[str, float]): Dictionary with date strings as keys and number of events as values
         x_label (str): x axis label
         y_label (str): y axis label
+        
         p_title (str): plot title
         p_label (str): plot label
+        
+        caption (str): plot caption
+        
         average_years (bool, optional): Whether or not to plot all years in the data, or plot the average of them all. Defaults to False.
+        
         tick_rotation (int, optional): Rotation of the tick. Defaults to 45.
+        
         heatmap (bool, optional): Whether or not to generate a heatmap alongside the plot. (is only generated with average_years). Defaults to False.
+        
         r_window (int, optional): Window for the rolling average of the events. Defaults to 30 (one month).
+        
         heatmap_lbl (str, optional): Label for the heatmap colorbar. Defaults to 'Average daily events'.
+        
         heatmap_title (str, optional): Title of the heatmap plot. Defaults to 'Heatmap'.
     """    
 
@@ -52,12 +63,15 @@ def date_events_plot(
         fig, ax = plt.subplots()
         ax.plot(df['date'], df['count'], label=p_label, color='skyblue', alpha=0.8)
 
-        ax.plot(df['date'], df['count'].rolling(window=r_window, center=True).mean(), label=f'{r_window}-day trend', color='navy', linewidth=2)
+        if rolling_avg:
+            ax.plot(df['date'], df['count'].rolling(window=r_window, center=True).mean(), label=f'{r_window}-day trend', color='navy', linewidth=2)
         ax.set_title(p_title)
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
         ax.grid(True, which='both', linestyle='--', alpha=0.6)
         ax.legend()
+        
+        plt.figtext(0.5, 0.01, caption, ha='center')  
         plt.show()
         return
 
@@ -79,7 +93,8 @@ def date_events_plot(
     
     ax[0].plot(plot_avg['date'], plot_avg['count'], label=p_label, color='skyblue', alpha=0.8)
 
-    ax[0].plot(plot_avg['date'], plot_avg['count'].rolling(window=r_window, center=True).mean(), label=f'{r_window}-day trend', color='navy', linewidth=2)
+    if rolling_avg:
+        ax[0].plot(plot_avg['date'], plot_avg['count'].rolling(window=r_window, center=True).mean(), label=f'{r_window}-day trend', color='navy', linewidth=2)
 
     ax[0].set_title(p_title)
 
@@ -109,6 +124,30 @@ def date_events_plot(
         
         sns.heatmap(heatmap_data, cmap='YlGnBu', cbar_kws={'label': heatmap_lbl}) # use seaborn for the heatmap
         plt.title(heatmap_title)
+    plt.figtext(0.5, 0.001, caption, ha='center')
+    plt.show()
+
+
+def generic_bar_plot(times_dict: dict[int, int],
+    x_label: str,
+    y_label: str,
+    p_title: str,
+    p_label: str,
+    no_x_ticks: int = 0,
+    tick_step: int = 1,
+    bar_color:str = 'orange',
+
+):
+    fig, ax = plt.subplots()
+    ax.bar(list(times_dict.keys()), list(times_dict.values()), color=bar_color)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(p_title)
+    ax.set_label(p_label)
+    
+    if no_x_ticks > 0 and tick_step >= 1: ax.set_xticks(range(0,no_x_ticks,tick_step))
+
+    fig.tight_layout()
     plt.show()
 
 
