@@ -1,8 +1,8 @@
 """
-Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
+    Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
 
-Author: Jesse Postma
-Version: 0.2
+    Author: Jesse Postma
+    Version: 0.2
 """
 
 
@@ -78,11 +78,11 @@ def process_data(files : list[str]):
 
 
 def graph_dates(dates: list[str]):
-    """_summary_
+    """Plot average number of incidents by date of occurrence.
 
     Args:
-        dates (list[str]): _description_
-    """    
+        dates (list[str]): List of date strings
+    """
     dates_dict = {}
     for date in dates:
         try:
@@ -90,14 +90,21 @@ def graph_dates(dates: list[str]):
         except Exception as e:
             print(f"Invalid date format: {date}")
             continue
-    grapher.date_events_plot(dates_dict, average_years=True, tick_rotation=45, heatmap=True, r_window=30)
+    grapher.date_events_plot(dates_dict, 
+                             x_label='Date', 
+                             y_label='Avg No. of Incidents', 
+                             p_title='Daily incidents by date of occurrence', 
+                             p_label='Average daily incidents',
+                             heatmap_lbl='Avg No. of Incidents', 
+                             heatmap_title ='Average Daily Activity Heatmap (Day of Week vs. Week of Year)',
+                             average_years=True, tick_rotation=45, heatmap=True, r_window=30)
 
 
 def main():
     """
     Main Function that handles code calling and small logic.
     """
-    print('Validating project structure and available data..')
+
     expected_files = ['Crime_Data_from_2020_to_Present.csv','criminal_codes.csv',
                     'LAPD_Reporting_District.csv', 'LAPD_Status_Codes.csv', 'mocodes.csv']
     helper.validate_project_structure(set(expected_files))
