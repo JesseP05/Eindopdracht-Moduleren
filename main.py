@@ -8,9 +8,9 @@
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 from datetime import datetime
 import helper, grapher
-
 
 def parse_mocodes(cell, map):
     """Parses a mocode string eg: 1300 0344 1606 2032 to a list of translated mocode(s)
@@ -102,7 +102,7 @@ def graph_dates(dates: list[str]):
         except Exception as e:
             print(f"Invalid date format: {date}")
             continue
-    grapher.date_events_plot(dates_dict, 
+    return grapher.date_events_plot(dates_dict, 
                              x_label='Date', 
                              y_label='Avg No. of Incidents', 
                              p_title='Daily incidents by date of occurrence', 
@@ -110,7 +110,7 @@ def graph_dates(dates: list[str]):
                              heatmap=True, 
                              heatmap_lbl='Avg No. of Incidents', 
                              heatmap_title ='Average Daily Activity Heatmap (Day of Week vs. Week of Year)',
-                             caption = 'Note: Reason for major spike(s) on january 1st(s) is a trait of the dataset..',
+                             caption = '',
                              average_years=True, tick_rotation=45, r_window=30)
 
 
@@ -128,13 +128,55 @@ def graph_times(times: list[str]):
         except Exception as e:
             print(f"Invalid time format: {time}")
             continue
-    grapher.generic_bar_plot(times_dict,
+    return grapher.generic_bar_plot(times_dict,
                              x_label='Hour of the day',
                              y_label='Total Number of Incidents',
                              p_title='Incidents by time of occurrence',
                              p_label='Total Incidents',
                              no_x_ticks=24,
                              tick_step=2)
+
+
+def graph_dangerous_areas(areas: list[str]):
+    area_dict = {}
+    for area in areas:
+        try:
+            area_dict[area] = area_dict.setdefault(area, 0) + 1
+        except Exception as e:
+            print(f"Invalid area format: {area}")
+            continue
+    return grapher.generic_bar_plot(area_dict,
+                             x_label='Area',
+                             y_label='Total Number of Incidents',
+                             p_title='Incidents by area',
+                             p_label='Total Incidents',
+                             no_x_ticks=0,
+                             tick_step=1,
+                             tick_rotation = 45,
+                             bar_color='#f08080',
+                             max_bars=10,
+                             sort='k')
+
+
+def graph_vic_age(ages: list[str]):
+    age_dict = {}
+    for age in ages:
+        try:
+            age_dict[age] = age_dict.setdefault(age, 0) + 1
+        except Exception as e:
+            print(f"Invalid area format: {age}")
+            continue
+    return grapher.generic_line_plot(age_dict,
+                             x_label='Victem Age',
+                             y_label='Total Number of Incidents',
+                             p_title='Incidents by Age',
+                             p_label='Total Incidents',
+                             no_x_ticks=0,
+                             tick_step=10,
+                             tick_rotation = 45,
+                             color="#d0f4de",
+                             sort = True
+                            )
 
 
 def main():
@@ -148,18 +190,33 @@ def main():
     
     data = process_data(expected_files)
     
+    #predefine figure collection
+    figures = []
+    
     # Function calls for specific graph we want
     dates = data['DATE OCC'].astype(str).tolist()
-    graph_dates(dates) # graph report count per day (switch between occ and rptd? prob just occ)
+    figures.append(graph_dates(dates)) # graph report count per day (switch between occ and rptd? prob just occ)
 
     times = data['TIME OCC'].tolist()
-    graph_times(times) # graph incident occ count per time on hourly interval
+    figures.append(graph_times(times)) # graph incident occ count per time on hourly interval
     
+    areas = data['AREA NAME'].tolist()
+    figures.append(graph_dangerous_areas(areas))
+    
+    ages = data['Vict Age'].tolist()
+    figures.append(graph_vic_age(ages)) # todo fix this shit
 
+    # todo wrap in function:
+    columns = st.slider('Amount of chart columns.',1,5,2,1)
+    cols = st.columns(columns)
+    for i, figure in enumerate(figures):
+        current_col = cols[i % columns]
+        with current_col:
+            st.pyplot(figure)
+     
     with open('debug_out.txt', 'w') as f:
         data.head(150).to_string(f)
 
-    # graph_dang_area() # bar chart for most dangerous areas -> count of rep/area (area name)
     # graph_victim_age() # bar chart
     # graph_charge() # bar chart
 

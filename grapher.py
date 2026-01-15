@@ -71,9 +71,8 @@ def date_events_plot(
         ax.grid(True, which='both', linestyle='--', alpha=0.6)
         ax.legend()
         
-        plt.figtext(0.5, 0.01, caption, ha='center')  
-        plt.show()
-        return
+        #plt.figtext(0.5, 0.01, caption, ha='center')
+        return fig
 
     # average over years plotting
     df['month'] = df['date'].dt.month # month
@@ -122,10 +121,10 @@ def date_events_plot(
         heatmap_data = plot_avg.pivot_table(index='Day of the week', columns='Week', values='count') # create pivot table
         heatmap_data = heatmap_data.reindex(days) # resort
         
-        sns.heatmap(heatmap_data, cmap='YlGnBu', cbar_kws={'label': heatmap_lbl}) # use seaborn for the heatmap
-        plt.title(heatmap_title)
-    plt.figtext(0.5, 0.001, caption, ha='center')
-    plt.show()
+        axes = sns.heatmap(heatmap_data, cmap='YlGnBu', cbar_kws={'label': heatmap_lbl}) # use seaborn for the heatmap
+        axes.set_title(heatmap_title)
+    fig.text(0.5, 0.001, caption, ha='center')
+    return fig
 
 
 def generic_bar_plot(times_dict: dict[int, int],
@@ -135,20 +134,94 @@ def generic_bar_plot(times_dict: dict[int, int],
     p_label: str,
     no_x_ticks: int = 0,
     tick_step: int = 1,
+    tick_rotation = 0,
     bar_color:str = 'orange',
-
+    max_bars: int = 0,
+    sort:bool = True
 ):
+    """Makes a generic bar plot
+
+    Args:
+        times_dict (dict[int, int]): Dictionary with a count and label
+        x_label (str): Lable for x axis
+        y_label (str): Lable for y axis
+        p_title (str): Plot title
+        p_label (str): Plot label
+        no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
+        tick_step (int, optional): Steps between ticks. Defaults to 1.
+        tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
+        bar_color (str, optional): Color of the bars. Defaults to 'orange'.
+    """
     fig, ax = plt.subplots()
+    if sort:
+        times_dict = dict(sorted(times_dict.items(), key=lambda item: item[1], reverse=True)) # sort based on value descending
+    if max_bars > 0:
+        trunc_dict = {}
+        for index,(key, value) in enumerate(times_dict.items()):
+            if index > max_bars:
+                times_dict.clear()
+                times_dict = trunc_dict
+                break
+            trunc_dict[key] = value
+        
     ax.bar(list(times_dict.keys()), list(times_dict.values()), color=bar_color)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(p_title)
     ax.set_label(p_label)
-    
+    ax.tick_params('x', rotation = tick_rotation)
     if no_x_ticks > 0 and tick_step >= 1: ax.set_xticks(range(0,no_x_ticks,tick_step))
 
     fig.tight_layout()
-    plt.show()
+    return fig
+
+
+def generic_line_plot(times_dict: dict[int, int],
+    x_label: str,
+    y_label: str,
+    p_title: str,
+    p_label: str,
+    no_x_ticks: int = 0,
+    tick_step: int = 1,
+    tick_rotation = 0,
+    color = 'orange',
+    sort: bool = '',
+):
+    """Makes a generic line plot
+
+    Args:
+        times_dict (dict[int, int]): Dictionary with a count and label
+        x_label (str): Lable for x axis
+        y_label (str): Lable for y axis
+        p_title (str): Plot title
+        p_label (str): Plot label
+        no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
+        tick_step (int, optional): Steps between ticks. Defaults to 1.
+        tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
+        color (str, optional): Color of the line. Defaults to 'orange'.
+
+    Returns:
+        _type_: Figure
+    """    
+    fig, ax = plt.subplots()
+    
+    if sort == 'k':
+        # sroting by key
+        times_dict = {k: v for k, v in sorted(times_dict.items(), key=lambda item: item[0])}
+    elif sort:
+        times_dict = {k: v for k, v in sorted(times_dict.items(), key=lambda item: item[1])}
+    
+    ax.plot(list(times_dict.keys()), list(times_dict.values()), color = color)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(p_title)
+    ax.set_label(p_label)
+    ax.tick_params('x', rotation = tick_rotation)
+
+    if no_x_ticks > 0 and tick_step >= 1: ax.set_xticks(range(0,no_x_ticks,tick_step))
+
+    fig.tight_layout()
+    return fig
 
 
 if __name__ == "__main__":
