@@ -300,8 +300,7 @@ def plot(series: pd.Series,
             series = series.sort_values(ascending = False)
         case SORT_TYPE.NONE:
             pass
-    
-    # delegate to the function stored in the enum
+
     frequency_dict = series.to_dict()
     return plot_type(
         frequency_dict, x_label, y_label, p_title, p_label,
