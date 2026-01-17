@@ -4,11 +4,26 @@
     version 0.1
 """
 
-
+from enum import Enum
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 import seaborn as sns
+
+
+class PLOT_TYPE(Enum):
+    BAR = 1,
+    LINE = 2,
+    PIE = 3,
+    HEATMAP = 4
+
+
+class SORT_TYPE(Enum):
+    KEY_BASED = 1,
+    VALUE_BASED = 2,
+    NONE = 3,
+    KEY_DESCENDING = 4,
+    VALUE_DESCENDING = 5
 
 
 def date_events_plot(
@@ -49,6 +64,9 @@ def date_events_plot(
         heatmap_lbl (str, optional): Label for the heatmap colorbar. Defaults to 'Average daily events'.
         
         heatmap_title (str, optional): Title of the heatmap plot. Defaults to 'Heatmap'.
+        
+    Returns:
+        Figure: A matplotlib figure
     """    
 
     if (not average_years) and heatmap: # doesnt make sense together
@@ -71,7 +89,7 @@ def date_events_plot(
         ax.grid(True, which='both', linestyle='--', alpha=0.6)
         ax.legend()
         
-        #plt.figtext(0.5, 0.01, caption, ha='center')
+        fig.text(0.5, 0.01, caption, ha='center')
         return fig
 
     # average over years plotting
@@ -137,7 +155,8 @@ def generic_bar_plot(times_dict: dict[int, int],
     tick_rotation = 0,
     bar_color:str = 'orange',
     max_bars: int = 0,
-    sort:bool = True
+    sort_type:bool = SORT_TYPE.VALUE_BASED,
+    caption: str = ''
 ):
     """Makes a generic bar plot
 
@@ -151,9 +170,14 @@ def generic_bar_plot(times_dict: dict[int, int],
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
         bar_color (str, optional): Color of the bars. Defaults to 'orange'.
+        sort_type (_type_, optional): sort type. Defaults to SORT_TYPE.NONE.
+        caption (str, optional): plot captoin. Defaults to ''.
+
+    Returns:
+        Figure: A matplotlib figure
     """
     fig, ax = plt.subplots()
-    if sort:
+    if sort_type == SORT_TYPE.VALUE_BASED: # no key based sorting because why would i
         times_dict = dict(sorted(times_dict.items(), key=lambda item: item[1], reverse=True)) # sort based on value descending
     if max_bars > 0:
         trunc_dict = {}
@@ -185,7 +209,8 @@ def generic_line_plot(times_dict: dict[int, int],
     tick_step: int = 1,
     tick_rotation = 0,
     color = 'orange',
-    sort: bool = '',
+    sort_type = SORT_TYPE.NONE,
+    caption: str = ''
 ):
     """Makes a generic line plot
 
@@ -199,16 +224,18 @@ def generic_line_plot(times_dict: dict[int, int],
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
         color (str, optional): Color of the line. Defaults to 'orange'.
+        sort_type (_type_, optional): sort type. Defaults to SORT_TYPE.NONE.
+        caption (str, optional): plot captoin. Defaults to ''.
 
     Returns:
-        _type_: Figure
-    """    
+        Figure: A matplotlib figure
+    """
     fig, ax = plt.subplots()
     
-    if sort == 'k':
+    if sort_type == SORT_TYPE.KEY_BASED:
         # sroting by key
         times_dict = {k: v for k, v in sorted(times_dict.items(), key=lambda item: item[0])}
-    elif sort:
+    elif sort_type == SORT_TYPE.VALUE_BASED:
         times_dict = {k: v for k, v in sorted(times_dict.items(), key=lambda item: item[1])}
     
     ax.plot(list(times_dict.keys()), list(times_dict.values()), color = color)
@@ -220,6 +247,79 @@ def generic_line_plot(times_dict: dict[int, int],
 
     if no_x_ticks > 0 and tick_step >= 1: ax.set_xticks(range(0,no_x_ticks,tick_step))
 
+    fig.text(0.5, 0.01, caption, ha='center')
+    fig.tight_layout()
+    return fig
+
+
+def plot(series: pd.Series,
+    x_label: str,
+    y_label: str,
+    p_title: str,
+    p_label: str,
+    no_x_ticks: int = 0,
+    tick_step: int = 1,
+    tick_rotation = 0,
+    color = 'blue',
+    caption = '',
+    sort_type = SORT_TYPE.NONE,
+    plot_type = PLOT_TYPE.LINE
+):
+    """Plots a graph of a series
+
+    Args:
+        series (pd.Series): The data
+        x_label (str): Lable for x axis
+        y_label (str): Lable for y axis
+        p_title (str): Plot title
+        p_label (str): Plot label
+        no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
+        tick_step (int, optional): Steps between ticks. Defaults to 1.
+        tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
+        color (str, optional): Color of the line. Defaults to 'orange'.
+        caption (str, optional): plot captoin. Defaults to ''.
+        sort_type (_type_, optional): sort type. Defaults to SORT_TYPE.NONE.
+        plot_type (_type_, optional): Plot type. Defaults to PLOT_TYPE.LINE.
+
+    Returns:
+        Figure: A matplotlib figure
+    Raises:
+        NotImplementedError
+    """    
+    # handle sorting first
+    match sort_type:
+        case SORT_TYPE.KEY_BASED:
+            series = series.sort_index()
+        case SORT_TYPE.VALUE_BASED:
+            series = series.sort_values()
+        case SORT_TYPE.KEY_DESCENDING:
+            series = series.sort_index(ascending = False)
+        case SORT_TYPE.VALUE_DESCENDING:
+            series = series.sort_values(ascending = False)
+        case SORT_TYPE.NONE:
+            pass
+    
+    fig, ax = plt.subplots()
+    
+    match plot_type:
+        case PLOT_TYPE.BAR:
+            ax.bar(series.index.astype(str), series.values, color=color)
+        case PLOT_TYPE.LINE:
+            ax.plot(series, color=color)
+        case PLOT_TYPE.PIE:
+            raise NotImplementedError
+        case PLOT_TYPE.HEATMAP:
+            raise NotImplementedError
+    
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(p_title)
+    ax.set_label(p_label)
+    ax.tick_params('x', rotation=tick_rotation)
+
+    if no_x_ticks > 0 and tick_step >= 1: ax.set_xticks(range(0,no_x_ticks,tick_step))
+
+    fig.text(0.5, 0.01, caption, ha='center')
     fig.tight_layout()
     return fig
 

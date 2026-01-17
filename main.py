@@ -11,6 +11,7 @@ import pandas as pd
 import streamlit as st
 from datetime import datetime
 import helper, grapher
+from grapher import SORT_TYPE, PLOT_TYPE
 
 def parse_mocodes(cell, map):
     """Parses a mocode string eg: 1300 0344 1606 2032 to a list of translated mocode(s)
@@ -155,28 +156,21 @@ def graph_dangerous_areas(areas: list[str]):
                              tick_rotation = 45,
                              bar_color='#f08080',
                              max_bars=10,
-                             sort='k')
+                             sort_type=SORT_TYPE.VALUE_BASED)
 
 
-def graph_vic_age(ages: list[str]):
-    age_dict = {}
-    for age in ages:
-        try:
-            age_dict[age] = age_dict.setdefault(age, 0) + 1
-        except Exception as e:
-            print(f"Invalid area format: {age}")
-            continue
-    return grapher.generic_line_plot(age_dict,
-                             x_label='Victem Age',
-                             y_label='Total Number of Incidents',
-                             p_title='Incidents by Age',
-                             p_label='Total Incidents',
-                             no_x_ticks=0,
-                             tick_step=10,
-                             tick_rotation = 45,
-                             color="#d0f4de",
-                             sort = True
-                            )
+def graph_vic_age(data: pd.DataFrame):
+    """Bins ages into ranges and returns figure.
+
+    Args:
+        data (pd.DataFrame): datafile
+    """    
+    bins = [0, 14, 21, 34, 44, 54, 64, data["Vict Age"].max()]
+    labels = ["0-14", "15-21", "22-34", '35-44', '45-54', '55-64', '65+']
+    binned_ages = pd.cut(data['Vict Age'], bins, labels=labels, ordered=True).dropna()
+
+    counts = binned_ages.value_counts().sort_index()
+    return grapher.plot(counts, 'Age range', 'No. of Incidents', 'Victim Age distribution','', color="#92BE49", plot_type=PLOT_TYPE.BAR)
 
 
 def main():
@@ -203,8 +197,7 @@ def main():
     areas = data['AREA NAME'].tolist()
     figures.append(graph_dangerous_areas(areas))
     
-    ages = data['Vict Age'].tolist()
-    figures.append(graph_vic_age(ages)) # todo fix this shit
+    figures.append(graph_vic_age(data))
 
     # todo wrap in function:
     columns = st.slider('Amount of chart columns.',1,5,2,1)
