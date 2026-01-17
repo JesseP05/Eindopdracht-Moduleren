@@ -17,6 +17,7 @@ EXPECTED_FILES = ['Crime_Data_from_2020_to_Present.csv','criminal_codes.csv',
                     'LAPD_Reporting_District.csv', 'LAPD_Status_Codes.csv', 'mocodes.csv']
 
 
+@st.cache_data
 def parse_mocodes(cell, mapping) -> str:
     """Parses a mocode string eg: 1300 0344 1606 2032 to a list of translated mocode(s)
 
@@ -96,22 +97,17 @@ def process_data(files : list[str]) -> pd.DataFrame:
     return lapd_df
 
 
-def graph_dates(dates: list[str]):
+def graph_dates(dates: pd.Series):
     """Plot average number of incidents by date of occurrence.
 
     Args:
-        dates (list[str]): List of date strings
+        dates (pd.Series): Series of date strings
     
     Returns:
         Figure: The matplotlib figure object
     """
-    dates_dict = {}
-    for date in dates:
-        try:
-            dates_dict[date] = dates_dict.setdefault(date, 0) + 1
-        except Exception:
-            print(f'Invalid date format: {date}')
-            continue
+    counts = dates.value_counts().sort_index()
+    dates_dict = dict(zip(counts.index.astype(str), counts.values))
     return grapher.date_events_plot(dates_dict, 
                              x_label='Date', 
                              y_label='Avg No. of Incidents', 
@@ -196,6 +192,12 @@ def render_plots(figures: list):
         figures (list): The matplotlib figures to render
     """
     st.set_page_config(layout='wide')
+    st.write('LAPD Crime Data Visualization by Jesse Postma')
+
+    md_intro = st.checkbox('Show markdown intro', value=False)
+    if md_intro:
+        st.markdown(readme := open('README.md').read(), unsafe_allow_html=True)
+        st.write('---')
     columns = st.slider('Amount of chart columns.',1,5,2,1)
     cols = st.columns(columns)
 
@@ -203,6 +205,7 @@ def render_plots(figures: list):
         current_col = cols[i % columns]
         with current_col:
             st.pyplot(figure, width='stretch')
+
 
 def main():
     """
@@ -216,8 +219,7 @@ def main():
     figures = []
 
     # function calls for graphs we want
-    dates = data['DATE OCC'].astype(str).tolist()
-    figures.append(graph_dates(dates))
+    figures.append(graph_dates(data['DATE OCC']))
 
     figures.append(graph_times(data['TIME OCC']))
 
