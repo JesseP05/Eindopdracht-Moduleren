@@ -170,8 +170,9 @@ def generic_bar_plot(times_dict: dict[int, int],
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
         bar_color (str, optional): Color of the bars. Defaults to 'orange'.
+        max_bars (int, optional): Maximum number of bars to display, zero-indexed. Defaults to 0 (all).
         sort_type (_type_, optional): sort type. Defaults to SORT_TYPE.NONE.
-        caption (str, optional): plot captoin. Defaults to ''.
+        caption (str, optional): plot caption. Defaults to ''.
 
     Returns:
         Figure: A matplotlib figure
