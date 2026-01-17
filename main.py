@@ -51,7 +51,7 @@ def process_data(files : list[str]) -> pd.DataFrame:
 
     lapd_df['DATE OCC'] = pd.to_datetime(lapd_df['DATE OCC'], format=r'%m/%d/%Y %I:%M:%S %p', errors='coerce') # fix formatting
     lapd_df['TIME OCC'] = lapd_df['TIME OCC'].str.zfill(4) # fill with leading zeros
-    lapd_df = lapd_df.sort_values(by='DATE OCC') # sort by date of incident
+    lapd_df = lapd_df.sort_values(by='DATE OCC')
     
     crim_cd_df = pd.read_csv(files[1], engine='pyarrow') # translation for criminal codes into classes
     rep_ds_df = pd.read_csv(files[2], engine='pyarrow') # gives info about bureau, type of unit
@@ -66,7 +66,7 @@ def process_data(files : list[str]) -> pd.DataFrame:
     rep_ds_df = rep_ds_df.drop_duplicates(subset=['REPDIST'])
     
     # new column for authority instead of overwriting rpt dist no
-    lapd_df['Authority Type'] = lapd_df['Rpt Dist No'] # adding a column for type of unit (eg. sheriff or police)
+    lapd_df['Authority Type'] = lapd_df['Rpt Dist No']
     
     # replace codes with descriptive values
     lapd_df = helper.dictionary_replace_csv(lapd_df, crim_cd_df, 'Criminal Code', 'Crm Cd', 'Class')
@@ -156,7 +156,7 @@ def graph_dangerous_areas(areas: pd.Series, num_areas: int = 10):
     Returns:
         Figure: The matplotlib figure object
     """
-    counts = areas.value_counts().head(num_areas) # get top n rows
+    counts = areas.value_counts().head(num_areas)
     return grapher.plot(counts,
                              x_label='Area',
                              y_label='Total Number of Incidents',
@@ -213,7 +213,6 @@ def main():
 
     data = process_data(EXPECTED_FILES)
 
-    # predefine figure collection
     figures = []
 
     # Function calls for specific graph we want
