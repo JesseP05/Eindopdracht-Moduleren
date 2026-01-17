@@ -35,7 +35,7 @@ def parse_mocodes(cell, mapping) -> str:
     mocodes = ', '.join(translated)
     return mocodes
 
-
+@st.cache_data
 def process_data(files : list[str]) -> pd.DataFrame:
     """Load and process the data files.
 
@@ -124,60 +124,47 @@ def graph_dates(dates: list[str]):
                              average_years=True, tick_rotation=45, r_window=30)
 
 
-def graph_times(times: list[str]):
-    """Plot number of incidents by time of occurrence.
+def graph_times(times: pd.Series):
+    """Plot number of incidents by hour of occurrence.
 
     Args:
-        times (list[str]): List of time strings
+        times (pd.Series): Series of time strings
     
     Returns:
         Figure: The matplotlib figure object
     """
-    times_dict = {}
-    for time in times:
-        try:
-            hour = int(time[:2]) # get hour from time string
-            times_dict[hour] = times_dict.setdefault(hour, 0) + 1
-        except Exception:
-            print(f'Invalid time format: {time}')
-            continue
-    return grapher.generic_bar_plot(times_dict,
+    hours = times.str[:2].astype(int)
+    counts = hours.value_counts().sort_index()
+    return grapher.plot(counts,
                              x_label='Hour of the day',
                              y_label='Total Number of Incidents',
-                             p_title='Incidents by time of occurrence',
+                             p_title='Incidents by hour of occurrence',
                              p_label='Total Incidents',
                              no_x_ticks=24,
-                             tick_step=2)
+                             tick_step=2,
+                             color= "#eccf98",
+                             plot_type=PLOT_TYPE.BAR)
 
 
-def graph_dangerous_areas(areas: list[str], num_areas: int =10):
+def graph_dangerous_areas(areas: pd.Series, num_areas: int = 10):
     """Graph total number of events per area, sorted descending
 
     Args:
-        areas (list[str]): List of areas from the dataset
-        num_areas (int, optional): Number of top areas to display, zero-indexed. Defaults to 10.
+        areas (pd.Series): Series of areas from the dataset
+        num_areas (int, optional): Number of top areas to display. Zero-indexed. Defaults to 10.
 
     Returns:
         Figure: The matplotlib figure object
-    """    
-    area_dict = {}
-    for area in areas:
-        try:
-            area_dict[area] = area_dict.setdefault(area, 0) + 1
-        except Exception:
-            print(f'Invalid area format: {area}')
-            continue
-    return grapher.generic_bar_plot(area_dict,
+    """
+    counts = areas.value_counts().head(num_areas) # get top n rows
+    return grapher.plot(counts,
                              x_label='Area',
                              y_label='Total Number of Incidents',
                              p_title=f'Incidents by top {num_areas} areas',
                              p_label='Total Incidents',
-                             no_x_ticks=0,
-                             tick_step=1,
-                             tick_rotation = 65,
+                             tick_rotation=65,
                              color='#f08080',
-                             max_bars=num_areas,
-                             sort_type=SORT_TYPE.VALUE_BASED)
+                             plot_type=PLOT_TYPE.BAR)
 
 
 def graph_vict_age(ages: pd.Series):
@@ -193,7 +180,13 @@ def graph_vict_age(ages: pd.Series):
     binned_ages = pd.cut(ages, bins, labels=labels, ordered=True).dropna()
 
     counts = binned_ages.value_counts().sort_index()
-    return grapher.plot(counts, 'Age range', 'No. of Incidents', 'Victim Age distribution','', color='#92BE49', plot_type=PLOT_TYPE.BAR)
+    return grapher.plot(counts,
+                            'Age range', 
+                            'No. of Incidents',
+                            'Victim Age distribution',
+                            'Total Incidents', 
+                            color='#92BE49',
+                            plot_type=PLOT_TYPE.BAR)
 
 
 def render_plots(figures: list):
@@ -201,14 +194,15 @@ def render_plots(figures: list):
 
     Args:
         figures (list): The matplotlib figures to render
-    """    
+    """
+    st.set_page_config(layout='wide')
     columns = st.slider('Amount of chart columns.',1,5,2,1)
     cols = st.columns(columns)
 
     for i, figure in enumerate(figures):
         current_col = cols[i % columns]
         with current_col:
-            st.pyplot(figure)
+            st.pyplot(figure, width='stretch')
 
 def main():
     """
@@ -226,11 +220,9 @@ def main():
     dates = data['DATE OCC'].astype(str).tolist()
     figures.append(graph_dates(dates)) # graph report count per day (switch between occ and rptd? prob just occ)
 
-    times = data['TIME OCC'].tolist()
-    figures.append(graph_times(times)) # graph incident occ count per time on hourly interval
+    figures.append(graph_times(data['TIME OCC']))
 
-    areas = data['AREA NAME'].tolist()
-    figures.append(graph_dangerous_areas(areas, num_areas=15))
+    figures.append(graph_dangerous_areas(data['AREA NAME'], num_areas=15))
 
     figures.append(graph_vict_age(data['Vict Age']))
 
