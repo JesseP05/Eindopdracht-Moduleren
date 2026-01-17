@@ -4,7 +4,7 @@ Dit is de uitwerking voor de eindopracht moduleren door Jesse Postma
 - [Eindopdracht Moduleren](#eindopdracht-moduleren)
   - [Uitleg](#uitleg)
   - [Installatie](#installatie)
-    - [Maak een virtual environment:](#maak-een-virtual-environment)
+    - [Maak een virtual environment (optional):](#maak-een-virtual-environment-optional)
     - [Activate venv (optional):](#activate-venv-optional)
     - [Install requirements:](#install-requirements)
     - [Run main.py:](#run-mainpy)
@@ -59,7 +59,7 @@ cd Eindopracht Moduleren
 curl -L -o "data/Crime_Data_from_2020_to_Present.csv" "https://data.lacity.org/api/views/2nrs-mtv8/rows.csv?accessType=DOWNLOAD"
 ```
 
-#### Maak een virtual environment:
+#### Maak een virtual environment (optional):
 ```bash
 python -m venv .venv
 ```
