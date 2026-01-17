@@ -6,6 +6,18 @@
 
 import os
 
+
+class DirectoryNotFoundError(Exception):
+    """Custom exception for directories not found.
+
+    Args:
+        message : Explanation of the error.
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
+
+
 def dictionary_replace_csv(main_df, sub_df, tbindex_header, replace_header, replacing_header = None):
     """Function that handles mapping of pandas dataframes.
 
@@ -27,7 +39,6 @@ def dictionary_replace_csv(main_df, sub_df, tbindex_header, replace_header, repl
     Returns:
         DataFrame: Mapped main_df. 
     """
-    lookup_df = None
     if replacing_header:
         lookup_df = sub_df.set_index(tbindex_header)[replacing_header]
     else:
@@ -50,7 +61,7 @@ def validate_project_structure(expected_files: set):
 
     print('Validating project structure...')
     dirpath = os.path.dirname(os.path.realpath(__file__))
-    data_dir = dirpath + '/data'
+    data_dir = os.path.join(dirpath, 'data')
     data_dir_exists = os.path.exists(data_dir)
 
     if not data_dir_exists:
@@ -59,20 +70,10 @@ def validate_project_structure(expected_files: set):
     files = os.listdir(data_dir)
     validator = expected_files - set(files)
 
-    if len(validator) > 0:
+    if validator:
         print(f'Files missing: {validator}')
         raise FileNotFoundError(f'File {validator} not found..')
-    print('Project structure succesfully validated.')
-
-class DirectoryNotFoundError(Exception):
-    """Custom exception for directories not found.
-
-    Args:
-        message : Explanation of the error.
-    """
-    def __init__(self, message):
-        self.message = message
-        super().__init__(message)
+    print('Project structure successfully validated.')
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 """
     Graphing module used by some of my scripts.
     Author: Jesse Postma
-    version 0.1
+    version 0.3
 """
 
 from enum import Enum
@@ -9,13 +9,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 import seaborn as sns
-
-
-class PLOT_TYPE(Enum):
-    BAR = 1,
-    LINE = 2,
-    PIE = 3,
-    HEATMAP = 4
 
 
 class SORT_TYPE(Enum):
@@ -145,7 +138,7 @@ def date_events_plot(
     return fig
 
 
-def generic_bar_plot(times_dict: dict[int, int],
+def generic_bar_plot(frequency_dict: dict[int, int],
     x_label: str,
     y_label: str,
     p_title: str,
@@ -153,15 +146,15 @@ def generic_bar_plot(times_dict: dict[int, int],
     no_x_ticks: int = 0,
     tick_step: int = 1,
     tick_rotation = 0,
-    bar_color:str = 'orange',
+    color:str = 'orange',
     max_bars: int = 0,
-    sort_type:bool = SORT_TYPE.VALUE_BASED,
+    sort_type:SORT_TYPE = SORT_TYPE.VALUE_BASED,
     caption: str = ''
 ):
     """Makes a generic bar plot
 
     Args:
-        times_dict (dict[int, int]): Dictionary with a count and label
+        frequency_dict (dict[int, int]): Dictionary with a count and label
         x_label (str): Lable for x axis
         y_label (str): Lable for y axis
         p_title (str): Plot title
@@ -169,9 +162,9 @@ def generic_bar_plot(times_dict: dict[int, int],
         no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
-        bar_color (str, optional): Color of the bars. Defaults to 'orange'.
+        color (str, optional): Color of the bars. Defaults to 'orange'.
         max_bars (int, optional): Maximum number of bars to display, zero-indexed. Defaults to 0 (all).
-        sort_type (_type_, optional): sort type. Defaults to SORT_TYPE.NONE.
+        sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
         caption (str, optional): plot caption. Defaults to ''.
 
     Returns:
@@ -179,17 +172,17 @@ def generic_bar_plot(times_dict: dict[int, int],
     """
     fig, ax = plt.subplots()
     if sort_type == SORT_TYPE.VALUE_BASED: # no key based sorting because why would i
-        times_dict = dict(sorted(times_dict.items(), key=lambda item: item[1], reverse=True)) # sort based on value descending
+        frequency_dict = dict(sorted(frequency_dict.items(), key=lambda item: item[1], reverse=True)) # sort based on value descending
     if max_bars > 0:
         trunc_dict = {}
-        for index,(key, value) in enumerate(times_dict.items()):
+        for index,(key, value) in enumerate(frequency_dict.items()):
             if index > max_bars:
-                times_dict.clear()
-                times_dict = trunc_dict
+                frequency_dict.clear()
+                frequency_dict = trunc_dict
                 break
             trunc_dict[key] = value
         
-    ax.bar(list(times_dict.keys()), list(times_dict.values()), color=bar_color)
+    ax.bar(list(frequency_dict.keys()), list(frequency_dict.values()), color=color)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(p_title)
@@ -201,7 +194,7 @@ def generic_bar_plot(times_dict: dict[int, int],
     return fig
 
 
-def generic_line_plot(times_dict: dict[int, int],
+def generic_line_plot(frequency_dict: dict[int, int],
     x_label: str,
     y_label: str,
     p_title: str,
@@ -210,36 +203,37 @@ def generic_line_plot(times_dict: dict[int, int],
     tick_step: int = 1,
     tick_rotation = 0,
     color = 'orange',
+    max_bars: int = 0,
     sort_type = SORT_TYPE.NONE,
     caption: str = ''
 ):
     """Makes a generic line plot
 
     Args:
-        times_dict (dict[int, int]): Dictionary with a count and label
-        x_label (str): Lable for x axis
-        y_label (str): Lable for y axis
+        frequency_dict (dict[int, int]): Dictionary with a count and label
+        x_label (str): Label for x axis
+        y_label (str): Label for y axis
         p_title (str): Plot title
         p_label (str): Plot label
         no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
         color (str, optional): Color of the line. Defaults to 'orange'.
-        sort_type (_type_, optional): sort type. Defaults to SORT_TYPE.NONE.
-        caption (str, optional): plot captoin. Defaults to ''.
-
+        max_bars (int, optional): Ignored (signature parity with bar plots). Defaults to 0.
+        sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
+        caption (str, optional): plot caption. Defaults to ''.
     Returns:
         Figure: A matplotlib figure
     """
     fig, ax = plt.subplots()
     
     if sort_type == SORT_TYPE.KEY_BASED:
-        # sroting by key
-        times_dict = {k: v for k, v in sorted(times_dict.items(), key=lambda item: item[0])}
+        # sorting by key
+        frequency_dict = {k: v for k, v in sorted(frequency_dict.items(), key=lambda item: item[0])}
     elif sort_type == SORT_TYPE.VALUE_BASED:
-        times_dict = {k: v for k, v in sorted(times_dict.items(), key=lambda item: item[1])}
+        frequency_dict = {k: v for k, v in sorted(frequency_dict.items(), key=lambda item: item[1])}
     
-    ax.plot(list(times_dict.keys()), list(times_dict.values()), color = color)
+    ax.plot(list(frequency_dict.keys()), list(frequency_dict.values()), color = color)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(p_title)
@@ -253,6 +247,11 @@ def generic_line_plot(times_dict: dict[int, int],
     return fig
 
 
+class PLOT_TYPE(Enum):
+    BAR = generic_bar_plot
+    LINE = generic_line_plot
+
+
 def plot(series: pd.Series,
     x_label: str,
     y_label: str,
@@ -260,27 +259,29 @@ def plot(series: pd.Series,
     p_label: str,
     no_x_ticks: int = 0,
     tick_step: int = 1,
-    tick_rotation = 0,
-    color = 'blue',
-    caption = '',
-    sort_type = SORT_TYPE.NONE,
-    plot_type = PLOT_TYPE.LINE
+    tick_rotation: int = 0,
+    color: str = 'blue',
+    caption: str = '',
+    max_bars: int = 0,
+    sort_type: SORT_TYPE = SORT_TYPE.NONE,
+    plot_type: PLOT_TYPE = PLOT_TYPE.LINE
 ):
     """Plots a graph of a series
 
     Args:
         series (pd.Series): The data
-        x_label (str): Lable for x axis
-        y_label (str): Lable for y axis
+        x_label (str): Label for x axis
+        y_label (str): Label for y axis
         p_title (str): Plot title
         p_label (str): Plot label
         no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
         color (str, optional): Color of the line. Defaults to 'orange'.
-        caption (str, optional): plot captoin. Defaults to ''.
-        sort_type (_type_, optional): sort type. Defaults to SORT_TYPE.NONE.
-        plot_type (_type_, optional): Plot type. Defaults to PLOT_TYPE.LINE.
+        caption (str, optional): plot caption. Defaults to ''.
+        max_bars (int, optional): Maximum number of bars to display, zero-indexed. Defaults to 0 (all).
+        sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
+        plot_type (PLOT_TYPE, optional): Plot type. Defaults to PLOT_TYPE.LINE.
 
     Returns:
         Figure: A matplotlib figure
@@ -300,29 +301,12 @@ def plot(series: pd.Series,
         case SORT_TYPE.NONE:
             pass
     
-    fig, ax = plt.subplots()
-    
-    match plot_type:
-        case PLOT_TYPE.BAR:
-            ax.bar(series.index.astype(str), series.values, color=color)
-        case PLOT_TYPE.LINE:
-            ax.plot(series, color=color)
-        case PLOT_TYPE.PIE:
-            raise NotImplementedError
-        case PLOT_TYPE.HEATMAP:
-            raise NotImplementedError
-    
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-    ax.set_title(p_title)
-    ax.set_label(p_label)
-    ax.tick_params('x', rotation=tick_rotation)
-
-    if no_x_ticks > 0 and tick_step >= 1: ax.set_xticks(range(0,no_x_ticks,tick_step))
-
-    fig.text(0.5, 0.01, caption, ha='center')
-    fig.tight_layout()
-    return fig
+    # delegate to the function stored in the enum
+    frequency_dict = series.to_dict()
+    return plot_type(
+        frequency_dict, x_label, y_label, p_title, p_label,
+        no_x_ticks, tick_step, tick_rotation, color, max_bars,
+        SORT_TYPE.NONE, caption) # dont sort again
 
 
 if __name__ == "__main__":

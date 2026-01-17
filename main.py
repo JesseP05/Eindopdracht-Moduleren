@@ -2,7 +2,7 @@
     Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
 
     Author: Jesse Postma
-    Version: 0.2
+    Version: 0.4
 """
 
 
@@ -175,22 +175,22 @@ def graph_dangerous_areas(areas: list[str], num_areas: int =10):
                              no_x_ticks=0,
                              tick_step=1,
                              tick_rotation = 65,
-                             bar_color='#f08080',
+                             color='#f08080',
                              max_bars=num_areas,
                              sort_type=SORT_TYPE.VALUE_BASED)
 
 
-def graph_vic_age(data: pd.DataFrame):
+def graph_vict_age(ages: pd.Series):
     """Bins ages into ranges and returns figure.
 
     Args:
-        data (pd.DataFrame): datafile
+        ages (pd.Series): Series of ages
     Returns:
         Figure: The matplotlib figure object
     """    
-    bins = [0, 14, 21, 34, 44, 54, 64, data['Vict Age'].max()]
+    bins = [0, 14, 21, 34, 44, 54, 64, ages.max()]
     labels = ['0-14', '15-21', '22-34', '35-44', '45-54', '55-64', '65+']
-    binned_ages = pd.cut(data['Vict Age'], bins, labels=labels, ordered=True).dropna()
+    binned_ages = pd.cut(ages, bins, labels=labels, ordered=True).dropna()
 
     counts = binned_ages.value_counts().sort_index()
     return grapher.plot(counts, 'Age range', 'No. of Incidents', 'Victim Age distribution','', color='#92BE49', plot_type=PLOT_TYPE.BAR)
@@ -232,7 +232,7 @@ def main():
     areas = data['AREA NAME'].tolist()
     figures.append(graph_dangerous_areas(areas, num_areas=15))
 
-    figures.append(graph_vic_age(data))
+    figures.append(graph_vict_age(data['Vict Age']))
 
     with open('debug_out.txt', 'w') as f:
         data.head(150).to_string(f)
