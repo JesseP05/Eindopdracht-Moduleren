@@ -1,5 +1,5 @@
 """
-    Helper module used by some of my scripts.
+    Helper module used by Eindopdracht moduleren.
     Author: Jesse Postma
 """
 
