@@ -17,7 +17,6 @@ EXPECTED_FILES = ['Crime_Data_from_2020_to_Present.csv','criminal_codes.csv',
                     'LAPD_Reporting_District.csv', 'LAPD_Status_Codes.csv', 'mocodes.csv']
 
 
-@st.cache_data
 def parse_mocodes(cell, mapping) -> str:
     """Parses a mocode string eg: 1300 0344 1606 2032 to a list of translated mocode(s)
 
@@ -36,7 +35,7 @@ def parse_mocodes(cell, mapping) -> str:
     mocodes = ', '.join(translated)
     return mocodes
 
-@st.cache_data
+
 def process_data(files : list[str]) -> pd.DataFrame:
     """Load and process the data files.
 
@@ -138,7 +137,7 @@ def graph_times(times: pd.Series):
                              p_label='Total Incidents',
                              no_x_ticks=24,
                              tick_step=2,
-                             color= "#eccf98",
+                             colors= "#eccf98",
                              plot_type=PLOT_TYPE.BAR)
 
 
@@ -159,7 +158,7 @@ def graph_dangerous_areas(areas: pd.Series, num_areas: int = 10):
                              p_title=f'Incidents by top {num_areas} areas',
                              p_label='Total Incidents',
                              tick_rotation=65,
-                             color='#f08080',
+                             colors='#f08080',
                              plot_type=PLOT_TYPE.BAR)
 
 
@@ -176,13 +175,37 @@ def graph_vict_age(ages: pd.Series):
     binned_ages = pd.cut(ages, bins, labels=labels, ordered=True).dropna()
 
     counts = binned_ages.value_counts().sort_index()
+
+    colors = ['#d4f0f0', '#a9e1e1', '#7ed2d2', '#53c3c3', '#28b4b4', '#009999', '#007777']
     return grapher.plot(counts,
                             'Age range', 
-                            'No. of Incidents',
+                            'Percentage of Victims',
                             'Victim Age distribution',
                             'Total Incidents', 
-                            color='#92BE49',
-                            plot_type=PLOT_TYPE.BAR)
+                            colors=colors,
+                            plot_type=PLOT_TYPE.PIE)
+
+
+def graph_descent(descents: pd.Series):
+    """Graphs victim descent distribution as a pie chart.
+    Args:
+        descents (pd.Series): Series of victim descent codes
+    Returns:
+        Figure: The matplotlib figure object
+    """
+    counts = descents.value_counts().sort_index()
+
+    colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99','#c2c2f0','#ffb3e6','#c4e17f',
+              '#f7c6c7','#b3b3b3','#ff6666','#669999','#ffb366','#b3ff66','#6666ff',
+              '#ff99e6','#99e6ff','#66ffb3','#cccccc','#ff4d4d','#4d79ff'] # evenveel als race_map
+    return grapher.plot(counts,
+                            'Victim Descent', 
+                            'Percentage of Victims',
+                            'Victim Descent distribution',
+                            'Total Incidents', 
+                            colors=colors,
+                            plot_type=PLOT_TYPE.PIE,
+                            threshold=2.0)
 
 
 def render_plots(figures: list):
@@ -226,6 +249,8 @@ def main():
     figures.append(graph_dangerous_areas(data['AREA NAME'], num_areas=15))
 
     figures.append(graph_vict_age(data['Vict Age']))
+    
+    figures.append(graph_descent(data['Vict Descent']))
 
     with open('debug_out.txt', 'w') as f:
         data.head(150).to_string(f)

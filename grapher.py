@@ -149,7 +149,8 @@ def generic_bar_plot(frequency_dict: dict[int, int],
     color:str = 'orange',
     max_bars: int = 0,
     sort_type:SORT_TYPE = SORT_TYPE.VALUE_BASED,
-    caption: str = ''
+    caption: str = '',
+    threshold: int = 0
 ):
     """Makes a generic bar plot
 
@@ -166,6 +167,7 @@ def generic_bar_plot(frequency_dict: dict[int, int],
         max_bars (int, optional): Maximum number of bars to display, zero-indexed. Defaults to 0 (all).
         sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
         caption (str, optional): plot caption. Defaults to ''.
+        threshold (int, optional): Minimum value to be included in the plot. Defaults to 0.
 
     Returns:
         Figure: A matplotlib figure
@@ -205,7 +207,8 @@ def generic_line_plot(frequency_dict: dict[int, int],
     color = 'orange',
     max_bars: int = 0,
     sort_type = SORT_TYPE.NONE,
-    caption: str = ''
+    caption: str = '',
+    threshold: int = 0
 ):
     """Makes a generic line plot
 
@@ -222,6 +225,7 @@ def generic_line_plot(frequency_dict: dict[int, int],
         max_bars (int, optional): Ignored (signature parity with bar plots). Defaults to 0.
         sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
         caption (str, optional): plot caption. Defaults to ''.
+        threshold (int, optional): Minimum value to be included in the plot. Defaults to 0.
     Returns:
         Figure: A matplotlib figure
     """
@@ -247,9 +251,54 @@ def generic_line_plot(frequency_dict: dict[int, int],
     return fig
 
 
+def generic_pie_plot(frequency_dict: dict[int, int],
+    x_label: str,
+    y_label: str,
+    p_title: str,
+    p_label: str,
+    no_x_ticks: int = 0,
+    tick_step: int = 1,
+    tick_rotation = 0,
+    colors = '',
+    max_bars: int = 0,
+    sort_type = SORT_TYPE.NONE,
+    caption: str = '',
+    threshold: int = 0
+):
+    fig, ax = plt.subplots()
+    
+    if sort_type == SORT_TYPE.KEY_BASED:
+        # sorting by key
+        frequency_dict = {k: v for k, v in sorted(frequency_dict.items(), key=lambda item: item[0])}
+    elif sort_type == SORT_TYPE.VALUE_BASED:
+        frequency_dict = {k: v for k, v in sorted(frequency_dict.items(), key=lambda item: item[1])}
+
+    # calculate cutoff and group others
+    total = sum(frequency_dict.values())
+    for k, v in list(frequency_dict.items()):
+        if (v / total) * 100 < threshold:
+            frequency_dict.setdefault('other', 0)
+            frequency_dict['other'] += v
+            del frequency_dict[k]
+
+    wedges, _, _ = ax.pie(list(frequency_dict.values()), labels=None, colors=colors, autopct='%1.1f%%')
+    
+    # Use legend instead of inline labels
+    ax.legend(wedges, list(frequency_dict.keys()), title=x_label, loc='center left', bbox_to_anchor=(1, 0.5))
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(p_title)
+    ax.set_label(p_label)
+
+    fig.text(0.5, 0.01, caption, ha='center')
+    fig.tight_layout()
+    return fig
+
+
 class PLOT_TYPE(Enum):
     BAR = generic_bar_plot
     LINE = generic_line_plot
+    PIE = generic_pie_plot
 
 
 def plot(series: pd.Series,
@@ -260,11 +309,12 @@ def plot(series: pd.Series,
     no_x_ticks: int = 0,
     tick_step: int = 1,
     tick_rotation: int = 0,
-    color: str = 'blue',
+    colors = 'blue',
     caption: str = '',
     max_bars: int = 0,
     sort_type: SORT_TYPE = SORT_TYPE.NONE,
-    plot_type: PLOT_TYPE = PLOT_TYPE.LINE
+    plot_type: PLOT_TYPE = PLOT_TYPE.LINE,
+    threshold: int = 0
 ):
     """Plots a graph of a series
 
@@ -277,11 +327,12 @@ def plot(series: pd.Series,
         no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
-        color (str, optional): Color of the line. Defaults to 'orange'.
+        colors (optional): Color or sequence of colors. Defaults to 'blue'.
         caption (str, optional): plot caption. Defaults to ''.
         max_bars (int, optional): Maximum number of bars to display, zero-indexed. Defaults to 0 (all).
         sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
         plot_type (PLOT_TYPE, optional): Plot type. Defaults to PLOT_TYPE.LINE.
+        threshold (int, optional): Minimum value to be included in the plot. Defaults to 0.
 
     Returns:
         Figure: A matplotlib figure
@@ -300,12 +351,15 @@ def plot(series: pd.Series,
             series = series.sort_values(ascending = False)
         case SORT_TYPE.NONE:
             pass
+    
+    if not plot_type == PLOT_TYPE.PIE and type(colors) != str and len(colors) < 1:
+        colors = colors[0]
 
     frequency_dict = series.to_dict()
     return plot_type(
         frequency_dict, x_label, y_label, p_title, p_label,
-        no_x_ticks, tick_step, tick_rotation, color, max_bars,
-        SORT_TYPE.NONE, caption) # dont sort again
+        no_x_ticks, tick_step, tick_rotation, colors, max_bars,
+        SORT_TYPE.NONE, caption, threshold) # dont sort again
 
 
 if __name__ == "__main__":
