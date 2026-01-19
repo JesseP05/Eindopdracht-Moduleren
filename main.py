@@ -208,6 +208,26 @@ def graph_descent(descents: pd.Series):
                             threshold=2.0)
 
 
+def graph_charges(charges: pd.Series):
+    """Graphs charges as a bar chart.
+
+    Args:
+        charges (pd.Series): Series of charge codes
+    Returns:
+        Figure: The matplotlib figure object
+    """
+    counts = charges.value_counts().sort_index()
+    return grapher.plot(counts,
+                             x_label='Charge Code',
+                             y_label='Total Number of Incidents',
+                             p_title='Incidents by Charge Code',
+                             p_label='Total Incidents',
+                             tick_rotation=90,
+                             colors="#f0c363",
+                             plot_type=PLOT_TYPE.BAR,
+                             grid=True)
+
+
 def render_plots(figures: list):
     """Function that renders the streamlit page with predefined plots
 
@@ -251,6 +271,8 @@ def main():
     figures.append(graph_vict_age(data['Vict Age']))
     
     figures.append(graph_descent(data['Vict Descent']))
+    
+    figures.append(graph_charges(data['Crm Cd']))
 
     with open('debug_out.txt', 'w') as f:
         data.head(150).to_string(f)
