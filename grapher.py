@@ -1,7 +1,7 @@
 """
     Graphing module used by some of my scripts.
     Author: Jesse Postma
-    version 0.3
+    version 0.4
 """
 
 from enum import Enum
@@ -30,7 +30,7 @@ def date_events_plot(
     heatmap: bool = False,
     heatmap_lbl: str = 'Average daily events',
     heatmap_title: str = 'Heatmap',
-    caption = '',
+    caption: str = '',
     r_window: int = 30,
     rolling_avg: bool = True,
     grid: bool = True
@@ -44,7 +44,6 @@ def date_events_plot(
         
         p_title (str): plot title
         p_label (str): plot label
-        
         caption (str): plot caption
         
         average_years (bool, optional): Whether or not to plot all years in the data, or plot the average of them all. Defaults to False.
@@ -88,7 +87,7 @@ def date_events_plot(
 
     # average over years plotting
     df['month'] = df['date'].dt.month # month
-    df['day'] = df['date'].dt.day # weekday
+    df['day'] = df['date'].dt.day # dotm
     years = df['date'].dt.year.nunique() # how many years of data (use nunique instead of unique )
 
     daily_average = df.groupby(['month', 'day'])['count'].sum() / years # average incidnet per day over the years
@@ -143,32 +142,31 @@ def generic_bar_plot(frequency_dict: dict[int, int],
     x_label: str,
     y_label: str,
     p_title: str,
-    p_label: str,
     no_x_ticks: int = 0,
     tick_step: int = 1,
-    tick_rotation = 0,
-    color:str = 'orange',
-    sort_type:SORT_TYPE = SORT_TYPE.VALUE_BASED,
+    tick_rotation: int = 0,
+    color: str = 'orange',
+    sort_type: SORT_TYPE = SORT_TYPE.VALUE_BASED,
     caption: str = '',
-    threshold: float = 0,
-    grid: bool = False
+    grid: bool = False,
+    grid_direction: str = 'both',
+    **kwargs
 ):
     """Makes a generic bar plot
 
     Args:
         frequency_dict (dict[int, int]): Dictionary with a count and label
-        x_label (str): Lable for x axis
-        y_label (str): Lable for y axis
+        x_label (str): Label for x axis
+        y_label (str): Label for y axis
         p_title (str): Plot title
-        p_label (str): Plot label
         no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
         color (str, optional): Color of the bars. Defaults to 'orange'.
-        sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
+        sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.VALUE_BASED.
         caption (str, optional): plot caption. Defaults to ''.
-        threshold (float, optional): Minimum value to be included in the plot. Defaults to 0.
         grid (bool, optional): Whether or not to show grid lines. Defaults to False.
+        **kwargs: Additional arguments (ignored).
 
     Returns:
         Figure: A matplotlib figure
@@ -181,11 +179,10 @@ def generic_bar_plot(frequency_dict: dict[int, int],
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(p_title)
-    ax.set_label(p_label)
     ax.tick_params('x', rotation = tick_rotation)
 
     if no_x_ticks > 0 and tick_step >= 1: ax.set_xticks(range(0,no_x_ticks,tick_step))
-    if grid: ax.grid(True, which='both', linestyle='--', alpha=0.6)
+    if grid: ax.grid(True, axis=grid_direction, linestyle='--', alpha=0.6)
     
     fig.text(0.5, 0.01, caption, ha='center')
     fig.tight_layout()
@@ -196,15 +193,15 @@ def generic_line_plot(frequency_dict: dict[int, int],
     x_label: str,
     y_label: str,
     p_title: str,
-    p_label: str,
     no_x_ticks: int = 0,
     tick_step: int = 1,
-    tick_rotation = 0,
-    color = 'orange',
-    sort_type = SORT_TYPE.NONE,
+    tick_rotation: int = 0,
+    color: str = 'orange',
+    sort_type: SORT_TYPE = SORT_TYPE.NONE,
     caption: str = '',
-    threshold: float = 0,
-    grid: bool = False
+    grid: bool = False,
+    grid_direction: str = 'both',
+    **kwargs
 ):
     """Makes a generic line plot
 
@@ -213,15 +210,14 @@ def generic_line_plot(frequency_dict: dict[int, int],
         x_label (str): Label for x axis
         y_label (str): Label for y axis
         p_title (str): Plot title
-        p_label (str): Plot label
         no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
         color (str, optional): Color of the line. Defaults to 'orange'.
         sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
         caption (str, optional): plot caption. Defaults to ''.
-        threshold (float, optional): Minimum value to be included in the plot. Defaults to 0.
         grid (bool, optional): Whether or not to show grid lines. Defaults to False.
+        **kwargs: Additional arguments (ignored).
     Returns:
         Figure: A matplotlib figure
     """
@@ -237,11 +233,10 @@ def generic_line_plot(frequency_dict: dict[int, int],
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(p_title)
-    ax.set_label(p_label)
     ax.tick_params('x', rotation = tick_rotation)
 
     if no_x_ticks > 0 and tick_step >= 1: ax.set_xticks(range(0,no_x_ticks,tick_step))
-    if grid: ax.grid(True, which='both', linestyle='--', alpha=0.6)
+    if grid: ax.grid(True, axis=grid_direction, linestyle='--', alpha=0.6)
 
     fig.text(0.5, 0.01, caption, ha='center')
     fig.tight_layout()
@@ -250,34 +245,24 @@ def generic_line_plot(frequency_dict: dict[int, int],
 
 def generic_pie_plot(frequency_dict: dict[int, int],
     x_label: str,
-    y_label: str,
     p_title: str,
-    p_label: str,
-    no_x_ticks: int = 0,
-    tick_step: int = 1,
-    tick_rotation = 0,
-    color = '',
-    sort_type = SORT_TYPE.NONE,
+    color: list[str] = None,
+    sort_type: SORT_TYPE = SORT_TYPE.NONE,
     caption: str = '',
     threshold: float = 0,
-    grid: bool = False
+    **kwargs
 ):
     """Makes a generic pie plot
 
     Args:
         frequency_dict (dict[int, int]): Dictionary with a count and label
-        x_label (str): Label for x axis
-        y_label (str): Label for y axis
+        x_label (str): Label for legend title
         p_title (str): Plot title
-        p_label (str): Plot label
-        no_x_ticks (int, optional): Ignored. Defaults to 0 (auto).
-        tick_step (int, optional): Ignored. Defaults to 1.
-        tick_rotation (int, optional): Ignored.
-        color (str or list, optional): Color(s) of the pie. Defaults to auto.
+        color (list[str], optional): Colors of the pie. Defaults to auto.
         sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
         caption (str, optional): plot caption. Defaults to ''.
-        threshold (float, optional): Minimum value to be included in the plot. Defaults to 0.
-        grid (bool, optional): Ignored.
+        threshold (float, optional): Minimum percentage to be included. Defaults to 0.
+        **kwargs: Additional arguments (ignored).
     Returns:
         Figure: A matplotlib figure
     """
@@ -301,10 +286,7 @@ def generic_pie_plot(frequency_dict: dict[int, int],
     
     # Use legend instead of inline labels
     ax.legend(wedges, list(frequency_dict.keys()), title=x_label, loc='center left', bbox_to_anchor=(1, 0.5))
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
     ax.set_title(p_title)
-    ax.set_label(p_label)
 
     fig.text(0.5, 0.01, caption, ha='center')
     fig.tight_layout()
@@ -321,16 +303,16 @@ def plot(series: pd.Series,
     x_label: str,
     y_label: str,
     p_title: str,
-    p_label: str,
     no_x_ticks: int = 0,
     tick_step: int = 1,
     tick_rotation: int = 0,
-    colors = 'blue',
+    color: str | list = 'blue',
     caption: str = '',
     sort_type: SORT_TYPE = SORT_TYPE.NONE,
     plot_type: PLOT_TYPE = PLOT_TYPE.LINE,
     threshold: float = 0,
-    grid: bool = False
+    grid: bool = False,
+    grid_direction: str = 'both'
 ):
     """Plots a graph of a series
 
@@ -339,21 +321,19 @@ def plot(series: pd.Series,
         x_label (str): Label for x axis
         y_label (str): Label for y axis
         p_title (str): Plot title
-        p_label (str): Plot label
         no_x_ticks (int, optional): No. of X ticks. Defaults to 0 (auto).
         tick_step (int, optional): Steps between ticks. Defaults to 1.
         tick_rotation (int, optional): Rotation for the x ticks. Defaults to 0.
-        colors (optional): Color or sequence of colors. Defaults to 'blue'.
+        color (str | list, optional): Color or sequence of colors. Defaults to 'blue'.
         caption (str, optional): plot caption. Defaults to ''.
         sort_type (SORT_TYPE, optional): sort type. Defaults to SORT_TYPE.NONE.
         plot_type (PLOT_TYPE, optional): Plot type. Defaults to PLOT_TYPE.LINE.
         threshold (float, optional): Minimum value to be included in the plot. Defaults to 0.
         grid (bool, optional): Whether or not to show grid lines. Defaults to False.
+        grid_direction (str, optional): Direction of the grid lines. Defaults to 'both'.
 
     Returns:
         Figure: A matplotlib figure
-    Raises:
-        NotImplementedError
     """    
     # handle sorting first
     match sort_type:
@@ -368,14 +348,25 @@ def plot(series: pd.Series,
         case SORT_TYPE.NONE:
             pass
     
-    if not plot_type == PLOT_TYPE.PIE and type(colors) != str and len(colors) < 1:
-        colors = colors[0]
+    if not plot_type == PLOT_TYPE.PIE and type(color) != str and len(color) < 1:
+        color = color[0]
 
     frequency_dict = series.to_dict()
     return plot_type(
-        frequency_dict, x_label, y_label, p_title, p_label,
-        no_x_ticks, tick_step, tick_rotation, colors,
-        SORT_TYPE.NONE, caption, threshold, grid) # dont sort again
+        frequency_dict=frequency_dict,
+        x_label=x_label,
+        y_label=y_label,
+        p_title=p_title,
+        no_x_ticks=no_x_ticks,
+        tick_step=tick_step,
+        tick_rotation=tick_rotation,
+        color=color,
+        sort_type=SORT_TYPE.NONE,
+        caption=caption,
+        threshold=threshold,
+        grid=grid,
+        grid_direction=grid_direction
+    )
 
 
 if __name__ == "__main__":
