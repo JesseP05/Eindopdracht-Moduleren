@@ -2,7 +2,7 @@
     Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
 
     Author: Jesse Postma
-    Version: 0.4
+    Version: 0.5
 """
 
 
@@ -110,8 +110,8 @@ def graph_dates(dates: pd.Series):
     return grapher.date_events_plot(dates_dict, 
                              x_label='Date', 
                              y_label='Avg No. of Incidents', 
-                             p_title='Daily incidents by date of occurrence', 
-                             p_label='Average daily incidents',
+                             p_title='Daily incidents by date of occurrence',
+                             p_label = 'Daily Incidents',
                              heatmap=True, 
                              heatmap_lbl='Avg No. of Incidents', 
                              heatmap_title ='Average Daily Activity Heatmap (Day of Week vs. Week of Year)',
@@ -134,10 +134,9 @@ def graph_times(times: pd.Series):
                              x_label='Hour of the day',
                              y_label='Total Number of Incidents',
                              p_title='Incidents by hour of occurrence',
-                             p_label='Total Incidents',
                              no_x_ticks=24,
                              tick_step=2,
-                             colors= "#eccf98",
+                             color= "#eccf98",
                              plot_type=PLOT_TYPE.BAR)
 
 
@@ -156,9 +155,8 @@ def graph_dangerous_areas(areas: pd.Series, num_areas: int = 10):
                              x_label='Area',
                              y_label='Total Number of Incidents',
                              p_title=f'Incidents by top {num_areas} areas',
-                             p_label='Total Incidents',
                              tick_rotation=65,
-                             colors='#f08080',
+                             color='#f08080',
                              plot_type=PLOT_TYPE.BAR)
 
 
@@ -181,8 +179,7 @@ def graph_vict_age(ages: pd.Series):
                             'Age range', 
                             'Percentage of Victims',
                             'Victim Age distribution',
-                            'Total Incidents', 
-                            colors=colors,
+                            color=colors,
                             plot_type=PLOT_TYPE.PIE)
 
 
@@ -202,8 +199,7 @@ def graph_descent(descents: pd.Series):
                             'Victim Descent', 
                             'Percentage of Victims',
                             'Victim Descent distribution',
-                            'Total Incidents', 
-                            colors=colors,
+                            color=colors,
                             plot_type=PLOT_TYPE.PIE,
                             threshold=2.0)
 
@@ -216,16 +212,17 @@ def graph_charges(charges: pd.Series):
     Returns:
         Figure: The matplotlib figure object
     """
-    counts = charges.value_counts().sort_index()
+    counts = charges.value_counts().sort_index() / 1000
     return grapher.plot(counts,
-                             x_label='Charge Code',
-                             y_label='Total Number of Incidents',
-                             p_title='Incidents by Charge Code',
-                             p_label='Total Incidents',
+                             x_label='Charge Class',
+                             y_label='Total Number of Incidents\nx1000',
+                             p_title='Incidents by Charge Class',
                              tick_rotation=90,
-                             colors="#f0c363",
+                             color="#f0c363",
                              plot_type=PLOT_TYPE.BAR,
-                             grid=True)
+                             sort_type=SORT_TYPE.VALUE_DESCENDING,
+                             grid=True,
+                             grid_direction='y')
 
 
 def render_plots(figures: list):
