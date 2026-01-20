@@ -2,19 +2,28 @@
     Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
 
     Author: Jesse Postma
-    Version: 0.7
+    Version: 0.9
 """
 
 
 import pandas as pd
 import streamlit as st
 
-import helper, grapher
-from grapher import SORT_TYPE, PLOT_TYPE
+import helper
+import grapher
+from grapher import SortType, PlotType
 
 
 EXPECTED_FILES = ['Crime_Data_from_2020_to_Present.csv','criminal_codes.csv',
                     'LAPD_Reporting_District.csv', 'LAPD_Status_Codes.csv', 'mocodes.csv']
+
+RACE_MAPPING = {
+    'A': 'Other Asian', 'B': 'Black', 'C': 'Chinese', 'D': 'Cambodian',
+    'F': 'Filipino', 'G': 'Guamanian', 'H': 'Hispanic/Latin/Mexican',
+    'I': 'American Indian/Alaskan Native', 'J': 'Japanese', 'K': 'Korean',
+    'L': 'Laotian', 'O': 'Other', 'P': 'Pacific Islander', 'S': 'Samoan',
+    'U': 'Hawaiian', 'V': 'Vietnamese', 'W': 'White', 'X': 'Unknown', 'Z': 'Asian Indian'
+    }
 
 
 def parse_mocodes(cell, mapping) -> str:
@@ -25,7 +34,7 @@ def parse_mocodes(cell, mapping) -> str:
         mapping: dictionary for mocode -> discription of the mocode
 
     Returns:
-        mocodes[str]: Translated values for the mocode(s)
+        mocodes(str): Translated values for the mocode(s)
     """
     if pd.isna(cell):
         return cell
@@ -35,28 +44,31 @@ def parse_mocodes(cell, mapping) -> str:
     mocodes = ', '.join(translated)
     return mocodes
 
-
-def process_data(files : list[str]) -> pd.DataFrame:
+@st.cache_data
+def process_data(files: list[str]) -> pd.DataFrame:
     """Load and process the data files.
 
     Args:
         files set(str): names of files in the data folder
     """
+    filepaths = []
     # prepend data/ to filenames
-    for i, org_file in enumerate(files):
+    for org_file in files:
         file = f'data/{org_file}'
-        files[i] = file
-    
-    lapd_df = pd.read_csv(files[0], engine='pyarrow', dtype={'TIME OCC': str})
+        filepaths.append(file)
 
-    lapd_df['DATE OCC'] = pd.to_datetime(lapd_df['DATE OCC'], format=r'%m/%d/%Y %I:%M:%S %p', errors='coerce') # fix formatting
+    lapd_df = pd.read_csv(filepaths[0], engine='pyarrow', dtype={'TIME OCC': str})
+
+    # fix formatting
+    date_form = r'%m/%d/%Y %I:%M:%S %p'
+    lapd_df['DATE OCC'] = pd.to_datetime(lapd_df['DATE OCC'], format=date_form)
     lapd_df['TIME OCC'] = lapd_df['TIME OCC'].str.zfill(4) # fill with leading zeros
     lapd_df = lapd_df.sort_values(by='DATE OCC')
-    
-    crim_cd_df = pd.read_csv(files[1], engine='pyarrow') # translation for criminal codes into classes
-    rep_ds_df = pd.read_csv(files[2], engine='pyarrow') # gives info about bureau, type of unit
-    stat_cd_df = pd.read_csv(files[3], engine='pyarrow') # translation for report status codes
-    mcode_df = pd.read_csv(files[4], engine='pyarrow', dtype={'MO Code': int}) # information about what has reportedly happened in the event
+
+    crim_cd_df = pd.read_csv(filepaths[1], engine='pyarrow') # translation for criminal codes
+    rep_ds_df = pd.read_csv(filepaths[2], engine='pyarrow') # gives info about bureau, type of unit
+    stat_cd_df = pd.read_csv(filepaths[3], engine='pyarrow') # translation for report status codes
+    # mcode_df = pd.read_csv(filepaths[4], engine='pyarrow', dtype={'MO Code': int})
 
     # Map criminal codes to classes
     crim_cd_df = crim_cd_df.drop_duplicates(subset=['Criminal Code'])
@@ -64,34 +76,26 @@ def process_data(files : list[str]) -> pd.DataFrame:
     # reparse reporting district to numeric and drop duplicates
     rep_ds_df['REPDIST'] = pd.to_numeric(rep_ds_df['REPDIST'])
     rep_ds_df = rep_ds_df.drop_duplicates(subset=['REPDIST'])
-    
+
     # new column for authority instead of overwriting rpt dist no
     lapd_df['Authority Type'] = lapd_df['Rpt Dist No']
-    
+
     # replace codes with descriptive values
-    lapd_df = helper.dictionary_replace_csv(lapd_df, crim_cd_df, 'Criminal Code', 'Crm Cd', 'Class')
-    lapd_df = helper.dictionary_replace_csv(lapd_df, rep_ds_df, 'REPDIST', 'Rpt Dist No', 'BUREAU')
-    lapd_df = helper.dictionary_replace_csv(lapd_df, rep_ds_df, 'REPDIST', 'Authority Type', 'S_TYPE')
-    lapd_df = helper.dictionary_replace_csv(lapd_df, stat_cd_df, 'status_code', 'Status', 'description')
-    
-    
+    lapd_df = helper.replace_csv_col(lapd_df, crim_cd_df, 'Criminal Code', 'Crm Cd', 'Class')
+    lapd_df = helper.replace_csv_col(lapd_df, rep_ds_df, 'REPDIST', 'Rpt Dist No', 'BUREAU')
+    lapd_df = helper.replace_csv_col(lapd_df, rep_ds_df, 'REPDIST', 'Authority Type', 'S_TYPE')
+    lapd_df = helper.replace_csv_col(lapd_df, stat_cd_df, 'status_code', 'Status', 'description')
+
+
     # mocode parsing is a bit harder because it can contain more than one code per cell
     # initialize a lookup map for mocodes
-    mocode_map = dict(zip(mcode_df['MO Code'].astype(int), mcode_df['Description']))
+    # mocode_map = dict(zip(mcode_df['MO Code'].astype(int), mcode_df['Description']))
 
     # parse mocodes to readable desription
-    lapd_df['Mocodes Readable'] = lapd_df['Mocodes'].apply(parse_mocodes, args=(mocode_map,)) # trailing comma because of tuple req
-    
-    # add racial mapping
-    race_mapping = {
-    'A': 'Other Asian', 'B': 'Black', 'C': 'Chinese', 'D': 'Cambodian',
-    'F': 'Filipino', 'G': 'Guamanian', 'H': 'Hispanic/Latin/Mexican',
-    'I': 'American Indian/Alaskan Native', 'J': 'Japanese', 'K': 'Korean',
-    'L': 'Laotian', 'O': 'Other', 'P': 'Pacific Islander', 'S': 'Samoan',
-    'U': 'Hawaiian', 'V': 'Vietnamese', 'W': 'White', 'X': 'Unknown', 'Z': 'Asian Indian'
-    }
+    # lapd_df['Mocodes Readable'] = lapd_df['Mocodes'].apply(parse_mocodes, args=(mocode_map,))
 
-    lapd_df['Vict Descent'] = lapd_df['Vict Descent'].map(race_mapping)
+    # add racial mapping
+    lapd_df['Vict Descent'] = lapd_df['Vict Descent'].map(RACE_MAPPING)
 
     return lapd_df
 
@@ -108,9 +112,9 @@ def graph_dates(dates: pd.Series, caption: str):
     """
     counts = dates.value_counts().sort_index()
     dates_dict = dict(zip(counts.index.astype(str), counts.values))
-    return grapher.date_events_plot(dates_dict, 
-                             x_label='Date', 
-                             y_label='Avg No. of Incidents', 
+    return grapher.date_events_plot(dates_dict,
+                             x_label='Date',
+                             y_label='Avg No. of Incidents',
                              p_title='Daily incidents by date of occurrence',
                              p_label = 'Daily Incidents',
                              heatmap=True,
@@ -138,7 +142,7 @@ def graph_times(times: pd.Series, caption: str):
                              x_max=24,
                              tick_step=2,
                              color= "#eccf98",
-                             plot_type=PLOT_TYPE.BAR), caption
+                             plot_type=PlotType.BAR), caption
 
 
 def graph_dangerous_areas(areas: pd.Series, caption: str, num_areas: int = 10):
@@ -159,7 +163,7 @@ def graph_dangerous_areas(areas: pd.Series, caption: str, num_areas: int = 10):
                              p_title=f'Incidents by top {num_areas} areas',
                              tick_rotation=65,
                              color='#f08080',
-                             plot_type=PLOT_TYPE.BAR), caption
+                             plot_type=PlotType.BAR), caption
 
 
 def graph_vict_age(ages: pd.Series, caption: str):
@@ -170,7 +174,7 @@ def graph_vict_age(ages: pd.Series, caption: str):
         caption (str): Caption for the figure
     Returns:
         tuple: (Figure, caption)
-    """    
+    """
     bins = [0, 14, 21, 34, 44, 54, 64, ages.max()]
     labels = ['0-14', '15-21', '22-34', '35-44', '45-54', '55-64', '65+']
     binned_ages = pd.cut(ages, bins, labels=labels, ordered=True).dropna()
@@ -183,7 +187,7 @@ def graph_vict_age(ages: pd.Series, caption: str):
                             'Percentage of Victims',
                             'Victim Age distribution',
                             color=colors,
-                            plot_type=PLOT_TYPE.PIE), caption
+                            plot_type=PlotType.PIE), caption
 
 
 def graph_descent(descents: pd.Series, caption: str):
@@ -204,7 +208,7 @@ def graph_descent(descents: pd.Series, caption: str):
                             'Percentage of Victims',
                             'Victim Descent distribution',
                             color=colors,
-                            plot_type=PLOT_TYPE.PIE,
+                            plot_type=PlotType.PIE,
                             threshold=2.0), caption
 
 
@@ -224,84 +228,86 @@ def graph_charges(charges: pd.Series, caption: str):
                              p_title='Incidents by Charge Class',
                              tick_rotation=55,
                              color="#f0c363",
-                             plot_type=PLOT_TYPE.BAR,
-                             sort_type=SORT_TYPE.VALUE_DESCENDING,
+                             plot_type=PlotType.BAR,
+                             sort_type=SortType.VALUE_DESCENDING,
                              grid=True,
                              grid_direction='y'), caption
 
 
-def graph_vict_sex(sexe: pd.Series, caption: str):
+def graph_vict_sex(sex: pd.Series, caption: str):
     """Graphs charges as a pie chart.
 
     Args:
-        sexe (pd.Series): Series of sexe values
+        sex (pd.Series): Series of sex values
         caption (str): Caption for the figure
     Returns:
         tuple: (Figure, caption)
     """
-    counts = sexe.value_counts().sort_index()
-    
+    counts = sex.value_counts().sort_index()
+
     colors = ['#ff9999','#66b3ff', '#99ff99'] # f,m,x
     return grapher.plot(counts,
-                             x_label='Sex',
+                             x_label='Gender',
                              y_label='Percentage of Victims',
-                             p_title='Sexe distribution of Victims',
+                             p_title='Sex distribution of Victims',
                              color=colors,
-                             plot_type=PLOT_TYPE.PIE,
+                             plot_type=PlotType.PIE,
                              threshold=1.0,
                              use_other=False), caption
 
 
-def graph_premis_desc(premises: pd.Series, caption: str, max_items: int, truncation_length: int):
+def graph_premis_desc(premises: pd.Series, caption: str, max_items: int, trun_len: int):
     """Graphs premise description as a bar chart.
 
     Args:
         premises (pd.Series): Series of premise description values.
         caption (str): Caption for the figure
         max_items (int): Maximum number of items to display.
-        truncation_length (int): Length to truncate premise descriptions to.
+        trun_len (int): Length to truncate premise descriptions to.
     Returns:
         tuple: (Figure, caption)
     """
     counts = premises.value_counts().head(max_items) / 1000
     counts.index = counts.index.map(
-        lambda x: str(x)[:truncation_length] + '...' if len(str(x)) > truncation_length else str(x)) # truncate
+        lambda x: str(x)[:trun_len] + '...' if len(str(x)) > trun_len else str(x)) # truncate
     return grapher.plot(counts,
                              x_label='Premise Description',
                              y_label='Total Number of Incidents\nx1000',
                              p_title='Incidents by Premise Description',
                              tick_rotation=55,
                              color="#a8d5e2",
-                             plot_type=PLOT_TYPE.BAR,
-                             sort_type=SORT_TYPE.NONE,
+                             plot_type=PlotType.BAR,
+                             sort_type=SortType.NONE,
                              grid=False,
                              grid_direction='y'), caption
 
 
-def graph_weapon_desc(weapons: pd.Series, caption:str, max_items: int, hide_strongarm:bool, truncation_length: int):
+def graph_weapons(weapons: pd.Series, caption: str, max_items: int, hide_unar: bool, trun_len: int):
     """Graphs weapon description as a bar chart.
 
     Args:
         weapons (pd.Series): Series of weapon description values.
         caption (str): Caption for the figure
         max_items (int): Maximum number of items to display.
-        hide_strongarm (bool): Whether to hide dominant strong-arm entry.
-        truncation_length (int): Length to truncate weapon descriptions to.
+        hide_unar (bool): Whether to hide unarmed strong arm entries.
+        trun_len (int): Length to truncate weapon descriptions to.
     Returns:
         tuple: (Figure, caption)
     """
-    weapons = weapons[weapons != 'STRONG-ARM (HANDS, FIST, FEET OR BODILY FORCE)'] if hide_strongarm else weapons
+    if hide_unar:
+        weapons = weapons[weapons != 'STRONG-ARM (HANDS, FIST, FEET OR BODILY FORCE)']
+
     counts = weapons.value_counts().head(max_items) / 1000
     counts.index = counts.index.map(
-        lambda x: str(x)[:truncation_length] + '...' if len(str(x)) > truncation_length else str(x)) # truncate
+        lambda x: str(x)[:trun_len] + '...' if len(str(x)) > trun_len else str(x)) # truncate
     return grapher.plot(counts,
                              x_label='Weapon Description',
                              y_label='Total Number of Incidents\nx1000',
                              p_title='Incidents by Weapon Description',
                              tick_rotation=55,
                              color="#a8d5e2",
-                             plot_type=PLOT_TYPE.BAR,
-                             sort_type=SORT_TYPE.NONE,
+                             plot_type=PlotType.BAR,
+                             sort_type=SortType.NONE,
                              grid=False,
                              grid_direction='y'), caption
 
@@ -325,10 +331,11 @@ def graph_report_status(statuses: pd.Series, caption: str):
                             'Status of the report distribution',
                             color=colors,
                             caption='Only ~19% of reports are closed.',
-                            plot_type=PLOT_TYPE.PIE,
+                            plot_type=PlotType.PIE,
                             threshold=2.0), caption
 
 
+@st.cache_resource
 def graph_location_heatmap(locations: pd.DataFrame, caption: str):
     """Graphs location heatmap of incidents.
     Args:
@@ -339,10 +346,11 @@ def graph_location_heatmap(locations: pd.DataFrame, caption: str):
     """
     return grapher.location_heatmap(locations,
                                     title='Incident Location Heatmap in Los Angeles',
-                                    caption='Minimum incidents threshold set at 200', min_count=200), caption
+                                    caption='Minimum incidents threshold set at 200',
+                                    min_count=200), caption
 
 
-def render_plots(figures: list):
+def render_plots(fig_cap: list):
     """Function that renders the streamlit page with predefined plots
 
     Args:
@@ -353,19 +361,18 @@ def render_plots(figures: list):
 
     md_intro = st.checkbox('Show markdown intro', value=False)
     if md_intro:
-        with open('README.md', 'r') as f:
+        with open('README.md', 'r', encoding='utf-8') as f:
             md_content = f.read()
         st.markdown(md_content, unsafe_allow_html=True)
         st.write('---')
     columns = st.slider('Amount of chart columns.',1,5,2,1)
     cols = st.columns(columns)
 
-    for i, figure in enumerate(figures):
+    for i, (figure, caption) in enumerate(fig_cap):
         current_col = cols[i % columns]
         with current_col:
-            st.pyplot(figure[0], width='content')
-            st.write(f'Figure {i+1}: {figure[1]}') # caption
-
+            st.pyplot(figure, width='content')
+            st.write(f'Figure {i+1}: {caption}') # caption
 
 def main():
     """
@@ -376,49 +383,46 @@ def main():
 
     data = process_data(EXPECTED_FILES)
 
-    figures = []
+    fig_cap = []
 
     # function calls for graphs we want
-    figures.append(graph_dates(data['DATE OCC'], 
+    fig_cap.append(graph_dates(data['DATE OCC'],
                                'Average daily incidents over the year.'))
 
-    figures.append(graph_times(data['TIME OCC'], 
+    fig_cap.append(graph_times(data['TIME OCC'],
                                'Distribution of incidents by hour of the day.'))
 
-    figures.append(graph_dangerous_areas(data['AREA NAME'], 
+    fig_cap.append(graph_dangerous_areas(data['AREA NAME'],
                                          'Top areas with the most reported incidents.',
                                          num_areas=15))
 
-    figures.append(graph_vict_age(data['Vict Age'], 
+    fig_cap.append(graph_vict_age(data['Vict Age'],
                                   'Age distribution of victims grouped into ranges.'))
-    
-    figures.append(graph_descent(data['Vict Descent'], 
+
+    fig_cap.append(graph_descent(data['Vict Descent'],
                                  'Race distribution of victims.'))
-    
-    figures.append(graph_charges(data['Crm Cd'], 
+
+    fig_cap.append(graph_charges(data['Crm Cd'],
                                  'Distribution of incidents by charge class.'))
-    
-    figures.append(graph_vict_sex(data['Vict Sex'], 
+
+    fig_cap.append(graph_vict_sex(data['Vict Sex'],
                                   'Gender distribution of victims.'))
-    
-    figures.append(graph_premis_desc(data['Premis Desc'], 
+
+    fig_cap.append(graph_premis_desc(data['Premis Desc'],
                                      'Top premises where incidents occur.',
-                                     max_items=15, truncation_length=20))
-    
-    figures.append(graph_weapon_desc(data['Weapon Desc'], 
+                                     max_items=15, trun_len=20))
+
+    fig_cap.append(graph_weapons(data['Weapon Desc'],
                                      'Showcase of which weapons are most commonly used.',
-                                     max_items=15, hide_strongarm=True, truncation_length=20))
-    
-    figures.append(graph_report_status(data['Status'],
+                                     max_items=15, hide_unar=True, trun_len=20))
+
+    fig_cap.append(graph_report_status(data['Status'],
                                       'Distribution of report status.'))
-    
-    figures.append(graph_location_heatmap(data[['LAT', 'LON']].dropna(),
+
+    fig_cap.append(graph_location_heatmap(data[['LAT', 'LON']].dropna(),
                                           'Heatmap of incident locations in Los Angeles.'))
 
-    with open('debug_out.txt', 'w') as f:
-        data.head(150).to_string(f)
-
-    render_plots(figures)
+    render_plots(fig_cap)
 
 
 if __name__ == '__main__':

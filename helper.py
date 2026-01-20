@@ -18,7 +18,7 @@ class DirectoryNotFoundError(Exception):
         super().__init__(message)
 
 
-def dictionary_replace_csv(main_df, sub_df, tbindex_header, replace_header, replacing_header = None):
+def replace_csv_col(main_df, sub_df, tbindex_header, replace_header, replacing_header = None):
     """Function that handles mapping of pandas dataframes.
 
     Args:
@@ -26,15 +26,11 @@ def dictionary_replace_csv(main_df, sub_df, tbindex_header, replace_header, repl
         
         sub_df (DataFrame): The dataframe that contains mapping information.
         
-        tbindex_header (str): The header of the column that the sub_df
+        index_header (str): The column that the sub_df dataframe is indexed on.
         
-        dataframe should be indexed on.
+        replace_header (str): The column in main_df which will be replaced.
         
-        replace_header (str): The header of the column in main_df
-        of which the values will be replaced.
-        
-        replacing_header (str, optional): Optional specific interest header.
-        Use when only interested in a a,b type situation. Defaults to None.
+        replacing_header (str, optional): Optional specific interest header. Defaults to None.
 
     Returns:
         DataFrame: Mapped main_df. 
