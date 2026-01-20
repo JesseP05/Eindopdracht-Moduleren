@@ -220,7 +220,7 @@ def date_events_plot(
     return fig
 
 
-def generic_bar_plot(frequency_dict: dict[int, int],
+def simple_bar_plot(frequency_dict: dict[int, int],
     x_label: str,
     y_label: str,
     p_title: str,
@@ -234,7 +234,7 @@ def generic_bar_plot(frequency_dict: dict[int, int],
     grid_direction: str = 'both',
     **kwargs
 ):
-    """Makes a generic bar plot
+    """Makes a simple bar plot
 
     Args:
         frequency_dict (dict[int, int]): Dictionary with a count and label
@@ -272,7 +272,7 @@ def generic_bar_plot(frequency_dict: dict[int, int],
     return fig
 
 
-def generic_line_plot(frequency_dict: dict[int, int],
+def simple_line_plot(frequency_dict: dict[int, int],
     x_label: str,
     y_label: str,
     p_title: str,
@@ -286,7 +286,7 @@ def generic_line_plot(frequency_dict: dict[int, int],
     grid_direction: str = 'both',
     **kwargs
 ):
-    """Makes a generic line plot
+    """Makes a simple line plot
 
     Args:
         frequency_dict (dict[int, int]): Dictionary with a count and label
@@ -327,7 +327,7 @@ def generic_line_plot(frequency_dict: dict[int, int],
     return fig
 
 
-def generic_pie_plot(frequency_dict: dict[int, int],
+def simple_pie_plot(frequency_dict: dict[int, int],
     x_label: str,
     p_title: str,
     color: list[str] = None,
@@ -337,7 +337,7 @@ def generic_pie_plot(frequency_dict: dict[int, int],
     use_other: bool = True,
     **kwargs
 ):
-    """Makes a generic pie plot
+    """Makes a simple pie plot
 
     Args:
         frequency_dict (dict[int, int]): Dictionary with a count and label
@@ -381,9 +381,9 @@ def generic_pie_plot(frequency_dict: dict[int, int],
 
 
 class PLOT_TYPE(Enum):
-    BAR = generic_bar_plot
-    LINE = generic_line_plot
-    PIE = generic_pie_plot
+    BAR = simple_bar_plot
+    LINE = simple_line_plot
+    PIE = simple_pie_plot
 
 
 def plot(series: pd.Series,
@@ -402,7 +402,7 @@ def plot(series: pd.Series,
     grid_direction: str = 'both',
     use_other: bool = True
 ):
-    """Plots a graph of a series into one of the generic plot types.
+    """Plots a graph of a series into one of the simple plot types.
 
     Args:
         series (pd.Series): The data
