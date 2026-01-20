@@ -23,6 +23,18 @@ class SORT_TYPE(Enum):
 
 
 def location_heatmap(location_df: pd.DataFrame, title: str, caption:str ='', xlabel: str ='Longitude', ylabel: str ='Latitude', min_count: int =200):
+    """Plot locations of LAT LON onto a map with hex tiles with a color ramp to show count of points.
+
+    Args:
+        location_df (pd.DataFrame): Dataframe with LAT and LON columns.
+        title (str): Title of the plot
+        caption (str, optional): Caption for the plot. Defaults to ''.
+        xlabel (str, optional): Label for the x-axis. Defaults to 'Longitude'.
+        ylabel (str, optional): Label for the y-axis. Defaults to 'Latitude'.
+        min_count (int, optional): Minimum count of points to display in a hexbin. Defaults to 200.
+    Returns:
+        plt.Figure: The figure containing the plot.
+    """
     fig, ax = plt.subplots(figsize=(10,10))
 
     location_df = location_df[location_df != 0] # remove 0,0 coords

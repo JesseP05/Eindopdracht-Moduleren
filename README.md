@@ -4,15 +4,16 @@ Dit is de uitwerking voor de eindopracht moduleren door Jesse Postma
 - [Eindopdracht Moduleren](#eindopdracht-moduleren)
   - [Uitleg](#uitleg)
   - [Installatie](#installatie)
-    - [Maak een virtual environment (optional):](#maak-een-virtual-environment-optional)
-    - [Activate venv (optional):](#activate-venv-optional)
+    - [Download de dataset](#download-de-dataset)
+    - [Maak een virtual environment:](#maak-een-virtual-environment)
+    - [Activate venv:](#activate-venv)
     - [Install requirements:](#install-requirements)
-    - [Run main.py:](#run-mainpy)
+    - [Run main.py met streamlit:](#run-mainpy-met-streamlit)
     - [Handmatig:](#handmatig)
 
 
 ### Uitleg
-Het project is gefocused op een dataset van de politie van Los Angeles. De dataset is opgebouwd uit incidenten van 2020 tot eind 2025. De dataset bevat een aantal columns met codes die vaag zijn, deze worden automatisch vertaald m.b.v. verschillende andere datasets.
+Het project is gefocused op een dataset van de politie van Los Angeles. De dataset is opgebouwd uit incidenten van 2020 tot eind 2025. De dataset bevat een aantal columns met codes die vaag zijn, deze worden automatisch vertaald m.b.v. verschillende andere datasets. Alle plots worden dan in een browser geshowed m.b.v. streamlit.
 
 De dataset bestaat uit ruim 1 miljoen rows aan data. 
 <details>
@@ -52,6 +53,7 @@ De dataset bestaat uit ruim 1 miljoen rows aan data.
 
 ---
 ### Installatie
+#### Download de dataset
 Met git en curl (*recommended*):
 ```bash
 git clone https://github.com/JesseP05/Eindopdracht-Moduleren.git
@@ -59,11 +61,11 @@ cd Eindopracht Moduleren
 curl -L -o "data/Crime_Data_from_2020_to_Present.csv" "https://data.lacity.org/api/views/2nrs-mtv8/rows.csv?accessType=DOWNLOAD"
 ```
 
-#### Maak een virtual environment (optional):
+#### Maak een virtual environment:
 ```bash
 python -m venv .venv
 ```
-#### Activate venv (optional):
+#### Activate venv:
 * Windows (powershell of bash):
     ```bash
     ./.venv/scripts/activate
@@ -80,9 +82,9 @@ python -m venv .venv
 ```bash
 pip install -r requirements.txt
 ```
-#### Run main.py:
+#### Run main.py met streamlit:
 ```bash
-python main.py
+streamlit run main.py
 ```
 ---
 #### Handmatig:
