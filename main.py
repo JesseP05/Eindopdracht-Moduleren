@@ -329,6 +329,19 @@ def graph_report_status(statuses: pd.Series, caption: str):
                             threshold=2.0), caption
 
 
+def graph_location_heatmap(locations: pd.DataFrame, caption: str):
+    """Graphs location heatmap of incidents.
+    Args:
+        locations (pd.DataFrame): DataFrame with LAT and LON columns.
+        caption (str): Caption for the figure
+    Returns:
+        tuple: (Figure, caption)
+    """
+    return grapher.location_heatmap(locations,
+                                    title='Incident Location Heatmap in Los Angeles',
+                                    caption='Minimum incidents threshold set at 200', min_count=200), caption
+
+
 def render_plots(figures: list):
     """Function that renders the streamlit page with predefined plots
 
@@ -350,7 +363,7 @@ def render_plots(figures: list):
     for i, figure in enumerate(figures):
         current_col = cols[i % columns]
         with current_col:
-            st.pyplot(figure[0], width='stretch')
+            st.pyplot(figure[0], width='content')
             st.write(f'Figure {i+1}: {figure[1]}') # caption
 
 
@@ -399,7 +412,8 @@ def main():
     figures.append(graph_report_status(data['Status'],
                                       'Distribution of report status.'))
     
-    # TODO : LAT LON :)
+    figures.append(graph_location_heatmap(data[['LAT', 'LON']].dropna(),
+                                          'Heatmap of incident locations in Los Angeles.'))
 
     with open('debug_out.txt', 'w') as f:
         data.head(150).to_string(f)

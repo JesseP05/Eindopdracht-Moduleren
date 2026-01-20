@@ -11,6 +11,7 @@ from enum import Enum
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
+import contextily as ctx
 
 
 class SORT_TYPE(Enum):
@@ -19,6 +20,26 @@ class SORT_TYPE(Enum):
     NONE = 3
     KEY_DESCENDING = 4
     VALUE_DESCENDING = 5
+
+
+def location_heatmap(location_df: pd.DataFrame, title: str, caption:str ='', xlabel: str ='Longitude', ylabel: str ='Latitude', min_count: int =200):
+    fig, ax = plt.subplots(figsize=(10,10))
+
+    location_df = location_df[location_df != 0] # remove 0,0 coords
+    hb = ax.hexbin(x=location_df['LON'], y=location_df['LAT'], gridsize=50, cmap='inferno', mincnt=min_count, alpha=0.7)
+    # Colorbar to explain density
+    cb = fig.colorbar(hb, ax=ax, shrink=0.5)
+    cb.set_label('Count of Points')
+
+    # Background map
+    ctx.add_basemap(ax, crs='EPSG:4326', source=ctx.providers.OpenStreetMap.Mapnik)
+    
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    fig.text(0.5, 0.01, caption, ha='center')
+
+    return fig
 
 
 def simple_heatmap(
