@@ -113,9 +113,8 @@ def graph_dates(dates: pd.Series, caption: str):
                              y_label='Avg No. of Incidents', 
                              p_title='Daily incidents by date of occurrence',
                              p_label = 'Daily Incidents',
-                             heatmap=True, 
-                             heatmap_lbl='Avg No. of Incidents', 
-                             heatmap_title ='Average Daily Activity Heatmap (Day of Week vs. Week of Year)',
+                             heatmap=True,
+                             heatmap_title ='Average Daily Activity Heatmap',
                              caption = '',
                              average_years=True, tick_rotation=45, r_window=30), caption
 

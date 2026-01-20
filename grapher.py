@@ -11,7 +11,6 @@ from enum import Enum
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
-import seaborn as sns
 
 
 class SORT_TYPE(Enum):
@@ -20,6 +19,51 @@ class SORT_TYPE(Enum):
     NONE = 3
     KEY_DESCENDING = 4
     VALUE_DESCENDING = 5
+
+
+def simple_heatmap(
+    heatmap_data: pd.DataFrame,
+    xlabel: str,
+    ylabel: str,
+    ax: plt.Axes = None,
+    x_tick_step: int = 1,
+    color_map: str = 'YlGnBu',
+    heatmap_title: str = 'Heatmap'
+):
+    """Create a heatmap using matplotlib.
+
+    Args:
+        heatmap_data (pd.DataFrame): Pivot table with data to plot
+        xlabel (str): Label for x axis
+        ylabel (str): Label for y axis
+        ax (plt.Axes): Existing axes to plot on. If None, a new figure and axes will be created. Defaults to None.
+        x_tick_step (int, optional): Step size for x ticks. Defaults to 1.
+        color_map (str, optional): Colormap to use. Defaults to 'YlGnBu'.
+        heatmap_title (str, optional): Title of the heatmap. Defaults to 'Heatmap'.
+
+    Returns:
+        plt.Axes: The preexisting axes now containing the heatmap
+        plt.Figure: The figure containing the heatmap (if ax isnt provided)
+    """
+    fig = None
+    if ax is None:
+        fig, ax = plt.subplots()
+    im = ax.imshow(heatmap_data.values, cmap=color_map, aspect='auto')
+
+
+    ax.set_xticks(range(0,len(heatmap_data.columns), x_tick_step))
+    ax.set_xticklabels(heatmap_data.columns[0::x_tick_step])
+    ax.set_yticks(range(len(heatmap_data.index)))
+    ax.set_yticklabels(heatmap_data.index)
+
+    # Add the colorbar
+    color_bar = ax.figure.colorbar(im, ax=ax)
+    
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(heatmap_title)
+    
+    return ax if not fig else fig
 
 
 def date_events_plot(
@@ -31,14 +75,15 @@ def date_events_plot(
     average_years: bool = False,
     tick_rotation: int = 45,
     heatmap: bool = False,
-    heatmap_lbl: str = 'Average daily events',
+    heatmap_avg: bool = False,
     heatmap_title: str = 'Heatmap',
     caption: str = '',
     r_window: int = 30,
     rolling_avg: bool = True,
     grid: bool = True
 ):
-    """Function that trivializes plotting number of events by date.
+    """Function that i should split up into parts because its a lot but im lazy.
+    Function that trivializes plotting number of events by date.
 
     Args:
         date_dict (dict[str, float]): Dictionary with date strings as keys and number of events as values
@@ -57,7 +102,7 @@ def date_events_plot(
         
         r_window (int, optional): Window for the rolling average of the events. Defaults to 30 (one month).
         
-        heatmap_lbl (str, optional): Label for the heatmap colorbar. Defaults to 'Average daily events'.
+        heatmap_avg (bool, optional): Show rolling average on heatmap instead of raw values. Defaults to False.
         
         heatmap_title (str, optional): Title of the heatmap plot. Defaults to 'Heatmap'.
         grid (bool, optional): Whether or not to show grid lines. Defaults to True.
@@ -130,14 +175,14 @@ def date_events_plot(
         
         # plot average structure:
         # date, count, month, day, day_otw, week
+        plot_avg['count'] = plot_avg['count'].rolling(window=r_window, center=True).mean() if heatmap_avg else plot_avg['count']
         
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         
         heatmap_data = plot_avg.pivot_table(index='Day of the week', columns='Week', values='count') # create pivot table
         heatmap_data = heatmap_data.reindex(days) # resort
         
-        axes = sns.heatmap(heatmap_data, cmap='YlGnBu', cbar_kws={'label': heatmap_lbl}, ax=ax[1]) # use seaborn for the heatmap
-        axes.set_title(heatmap_title)
+        simple_heatmap(heatmap_data, xlabel='Week', ylabel='Day of the week', ax=ax[1], x_tick_step=2, heatmap_title=heatmap_title)
     fig.text(0.5, 0.001, caption, ha='center')
     return fig
 
