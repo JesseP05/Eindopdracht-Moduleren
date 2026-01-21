@@ -17,14 +17,14 @@ Het project is gefocused op een dataset van de politie van Los Angeles. De datas
 
 De dataset bestaat uit ruim 1 miljoen rows aan data. 
 <details>
-<summary><i>De data waarin ik in het bijzonder geinteresseerd in ben:</i></summary>
+<summary><i>De data waarin ik in het bijzonder geinteresseert ben:</i></summary>
 
 * DATE OCC
     > Datum waarop het incident heeft plaatsgevonden
 * TIME OCC
     > Tijdstip waarop het incident heeft plaatsgevonden
 * AREA NAME
-    > ~Wijk
+    > ~Wijk waarin het incident heeft plaatsgevonden
 * Crm Cd
     > Code waarmee wordt aangetoond wat er is gebeurd. Ik vervang dit met een classificatie m.b.v. criminal_codes.csv
 * Mocodes
