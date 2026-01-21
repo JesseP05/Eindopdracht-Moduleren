@@ -1,5 +1,7 @@
 """
     Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
+    
+    Warning: This branch contains mocode translation which can be interpreted as graphic content.
 
     Author: Jesse Postma
     Version: 1.1
@@ -385,6 +387,7 @@ def render_plots(fig_cap: list, data: pd.DataFrame):
         st.write('---')
 
     show_df = st.checkbox('Show raw data sample', value=False)
+    st.warning('Warning: This branch of the project contains mocode translation which can be interpreted as graphic content.')
     if not show_df:
         columns = st.slider('Amount of chart columns.',1,5,2,1)
         cols = st.columns(columns)
