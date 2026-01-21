@@ -2,7 +2,7 @@
     Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
 
     Author: Jesse Postma
-    Version: 0.9
+    Version: 1.0
 """
 
 
@@ -26,7 +26,7 @@ RACE_MAPPING = {
     }
 
 
-@st.cache_data
+@st.cache_data # cache for faster reloads
 def process_data(files: list[str]) -> pd.DataFrame:
     """Load and process the data files.
 
@@ -84,14 +84,14 @@ def graph_dates(dates: pd.Series, caption: str):
         tuple: (Figure, caption)
     """
     counts = dates.value_counts().sort_index()
-    
+
     # Create DataFrame directly from Series
     df = counts.reset_index()
     df.columns = ['date', 'count']
-    
+
     plot_avg = helper.calculate_yearly_average(df)
     heatmap_data = helper.prepare_heatmap_data(plot_avg, use_rolling_avg=False, r_window=30)
-    
+
     return grapher.date_series(
                             plot_data=plot_avg,
                             heatmap_data=heatmap_data,
@@ -344,7 +344,7 @@ def render_plots(fig_cap: list):
     """
     st.set_page_config(layout='centered')
     st.write('LAPD Crime Data Visualization by Jesse Postma')
-    
+
     page_lyt = st.selectbox('Select page layout', ['Centered', 'Fullscreen'])
     if page_lyt == 'Fullscreen':
         st.set_page_config(layout='wide')

@@ -1,10 +1,10 @@
 """
     Graphing module used by some of my scripts.
     Author: Jesse Postma
-    version 0.4
+    version 0.5
 """
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 
 from enum import Enum
@@ -197,7 +197,7 @@ def simple_bar_plt(frequency_dict: dict[int, int],
     caption: str = '',
     grid: bool = False,
     grid_direction: str = 'both',
-    **kwargs
+    **_
 ):
     """Makes a simple bar plot
 
@@ -213,7 +213,7 @@ def simple_bar_plt(frequency_dict: dict[int, int],
         sort_type (SortType, optional): sort type. Defaults to SortType.VALUE_BASED.
         caption (str, optional): plot caption. Defaults to ''.
         grid (bool, optional): Whether or not to show grid lines. Defaults to False.
-        **kwargs: Additional arguments (ignored).
+        **_: Additional arguments (ignored).
 
     Returns:
         Figure: A matplotlib figure
@@ -252,7 +252,7 @@ def simple_line_plt(frequency_dict: dict[int, int],
     caption: str = '',
     grid: bool = False,
     grid_direction: str = 'both',
-    **kwargs
+    **_
 ):
     """Makes a simple line plot
 
@@ -268,7 +268,7 @@ def simple_line_plt(frequency_dict: dict[int, int],
         sort_type (SortType, optional): sort type. Defaults to SortType.NONE.
         caption (str, optional): plot caption. Defaults to ''.
         grid (bool, optional): Whether or not to show grid lines. Defaults to False.
-        **kwargs: Additional arguments (ignored).
+        **_: Additional arguments (ignored).
     Returns:
         Figure: A matplotlib figure
     """
@@ -305,7 +305,7 @@ def simple_pie_plt(frequency_dict: dict[int, int],
     caption: str = '',
     threshold: float = 0,
     use_other: bool = True,
-    **kwargs
+    **_
 ):
     """Makes a simple pie plot
 
@@ -318,7 +318,7 @@ def simple_pie_plt(frequency_dict: dict[int, int],
         caption (str, optional): plot caption. Defaults to ''.
         threshold (float, optional): Minimum percentage to be included. Defaults to 0.
         use_other (bool, optional): Should group small values into 'other'. Defaults to True.
-        **kwargs: Additional arguments (ignored).
+        **_: Additional arguments (ignored).
     Returns:
         Figure: A matplotlib figure
     """

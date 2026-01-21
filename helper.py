@@ -1,6 +1,8 @@
 """
     Helper module used by Eindopdracht moduleren.
     Author: Jesse Postma
+    
+    Version: 1.0
 """
 
 
@@ -85,10 +87,10 @@ def calculate_yearly_average(df: pd.DataFrame):
     df['month'] = df['date'].dt.month
     df['day'] = df['date'].dt.day
     years = df['date'].dt.year.nunique()
-    
+
     daily_average = df.groupby(['month', 'day'])['count'].sum() / years
     plot_avg = daily_average.reset_index()
-    
+
     plot_avg['date'] = pd.to_datetime(
         {'year': 2000, 'month': plot_avg['month'], 'day': plot_avg['day']}
     )
@@ -109,12 +111,12 @@ def prepare_heatmap_data(plot_avg: pd.DataFrame, use_rolling_avg: bool = False, 
     """
     plot_avg['Day of the week'] = plot_avg['date'].dt.day_name()
     plot_avg['Week'] = plot_avg['date'].dt.isocalendar().week
-    
+
     if use_rolling_avg:
         plot_avg['count'] = plot_avg['count'].rolling(window=r_window, center=True).mean()
-    
+
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    
+
     heatmap_data = plot_avg.pivot_table(
         index='Day of the week',
         columns='Week',
