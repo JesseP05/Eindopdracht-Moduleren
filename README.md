@@ -9,7 +9,7 @@ Dit is de uitwerking voor de eindopracht moduleren door Jesse Postma
     - [Activate venv:](#activate-venv)
     - [Install requirements:](#install-requirements)
     - [Run main.py met streamlit:](#run-mainpy-met-streamlit)
-    - [Handmatig:](#handmatig)
+    - [Handmatige installatie:](#handmatige-installatie)
 
 
 ### Uitleg
@@ -25,14 +25,10 @@ De dataset bestaat uit ruim 1 miljoen rows aan data.
     > Tijdstip waarop het incident heeft plaatsgevonden
 * AREA NAME
     > ~Wijk
-* Rpt Dist No
-    > Dit is welk politie district het incident onder valt, ik vervang dit met welk bureau verantwoordelijk is m.b.v. LAPD_Reporting_District.csv
 * Crm Cd
     > Code waarmee wordt aangetoond wat er is gebeurd. Ik vervang dit met een classificatie m.b.v. criminal_codes.csv
-* Crm Cd Desc
-    > Descriptie van wat er in *aanklaagbare termen* is gebeurd
-* Mocodes
-    > Kan een lijst van codes zijn die omschrijven wat er exact heeft plaatsgevonden, ik vertaal deze codes m.b.v. mocodes.csv
+* ~~Mocodes~~ Niet meer. Is erg interessant maar kan vrij uitgebreid en grafisch zijn..
+~~    > Kan een lijst van codes zijn die omschrijven wat er exact heeft plaatsgevonden, ik vertaal deze codes m.b.v. mocodes.csv ~~
 * Vict Age
     > Leeftijd van het slachtoffer
 * Vict Sex
@@ -87,7 +83,7 @@ pip install -r requirements.txt
 streamlit run main.py
 ```
 ---
-#### Handmatig:
+#### Handmatige installatie:
 * Download de zip van dit project.
 * Unzip de inhoud naar een locatie van keuze.
 * Download de [dataset](https://data.lacity.org/api/views/2nrs-mtv8/rows.csv?accessType=DOWNLOAD) naar de "data/"  folder in het project
