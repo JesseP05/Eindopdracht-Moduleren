@@ -26,6 +26,25 @@ RACE_MAPPING = {
     }
 
 
+def parse_mocodes(cell, mapping) -> str:
+    """Parses a mocode string eg: 1300 0344 1606 2032 to a list of translated mocode(s)
+
+    Args:
+        cell : pandas cell with mocodes
+        mapping: dictionary for mocode -> discription of the mocode
+
+    Returns:
+        mocodes(str): Translated values for the mocode(s)
+    """
+    if pd.isna(cell):
+        return cell
+    codes = cell.split(' ')
+    codes = [int(code) for code in codes]
+    translated = [str(mapping.get(c, c)) for c in codes]
+    mocodes = ', '.join(translated)
+    return mocodes
+
+
 @st.cache_data # cache for faster reloads
 def process_data(files: list[str]) -> pd.DataFrame:
     """Load and process the data files.
@@ -50,6 +69,7 @@ def process_data(files: list[str]) -> pd.DataFrame:
     crim_cd_df = pd.read_csv(filepaths[1], engine='pyarrow') # translation for criminal codes
     rep_ds_df = pd.read_csv(filepaths[2], engine='pyarrow') # gives info about bureau, type of unit
     stat_cd_df = pd.read_csv(filepaths[3], engine='pyarrow') # translation for report status codes
+    mcode_df = pd.read_csv(filepaths[4], engine='pyarrow', dtype={'MO Code': int})
 
     # Map criminal codes to classes
     crim_cd_df = crim_cd_df.drop_duplicates(subset=['Criminal Code'])
@@ -66,6 +86,13 @@ def process_data(files: list[str]) -> pd.DataFrame:
     lapd_df = helper.replace_csv_col(lapd_df, rep_ds_df, 'REPDIST', 'Rpt Dist No', 'BUREAU')
     lapd_df = helper.replace_csv_col(lapd_df, rep_ds_df, 'REPDIST', 'Authority Type', 'S_TYPE')
     lapd_df = helper.replace_csv_col(lapd_df, stat_cd_df, 'status_code', 'Status', 'description')
+
+    # mocode parsing is a bit harder because it can contain more than one code per cell
+    # initialize a lookup map for mocodes
+    mocode_map = dict(zip(mcode_df['MO Code'].astype(int), mcode_df['Description']))
+
+    # parse mocodes to readable desription
+    lapd_df['Mocodes Readable'] = lapd_df['Mocodes'].apply(parse_mocodes, args=(mocode_map,))
 
     # add racial mapping
     lapd_df['Vict Descent'] = lapd_df['Vict Descent'].map(RACE_MAPPING)
