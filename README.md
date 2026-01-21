@@ -27,8 +27,9 @@ De dataset bestaat uit ruim 1 miljoen rows aan data.
     > ~Wijk
 * Crm Cd
     > Code waarmee wordt aangetoond wat er is gebeurd. Ik vervang dit met een classificatie m.b.v. criminal_codes.csv
-* ~~Mocodes~~ Niet meer. Is erg interessant maar kan vrij uitgebreid en grafisch zijn..
-~~    > Kan een lijst van codes zijn die omschrijven wat er exact heeft plaatsgevonden, ik vertaal deze codes m.b.v. mocodes.csv ~~
+* Mocodes
+    > Kan een lijst van codes zijn die omschrijven wat er exact heeft plaatsgevonden, ik vertaal deze codes m.b.v. mocodes.csv 
+    > Deze vertalingen kunnen vrij hard zijn.
 * Vict Age
     > Leeftijd van het slachtoffer
 * Vict Sex
