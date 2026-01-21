@@ -2,7 +2,7 @@
     Eindopdracht moduleren; Een visualisatie van reported crime in Los Angeles.
 
     Author: Jesse Postma
-    Version: 1.0
+    Version: 1.1
 """
 
 
@@ -336,11 +336,12 @@ def graph_location_heatmap(locations: pd.DataFrame, caption: str):
                                     min_count=200), caption
 
 
-def render_plots(fig_cap: list):
+def render_plots(fig_cap: list, data: pd.DataFrame):
     """Function that renders the streamlit page with predefined plots
 
     Args:
         figures (list): List of tuples containing (Figure, caption)
+        data (pd.DataFrame): Sample to show
     """
     st.set_page_config(layout='centered')
     st.write('LAPD Crime Data Visualization by Jesse Postma')
@@ -356,14 +357,21 @@ def render_plots(fig_cap: list):
         st.markdown(md_content, unsafe_allow_html=True)
         st.write('---')
 
-    columns = st.slider('Amount of chart columns.',1,5,2,1)
-    cols = st.columns(columns)
+    show_df = st.checkbox('Show raw data sample', value=False)
+    if not show_df:
+        columns = st.slider('Amount of chart columns.',1,5,2,1)
+        cols = st.columns(columns)
 
-    for i, (figure, caption) in enumerate(fig_cap):
-        current_col = cols[i % columns]
-        with current_col:
-            st.pyplot(figure, width='content')
-            st.write(f'Figure {i+1}: {caption}') # caption
+        for i, (figure, caption) in enumerate(fig_cap):
+            current_col = cols[i % columns]
+            with current_col:
+                st.pyplot(figure, width='content')
+                st.write(f'Figure {i+1}: {caption}') # caption
+    else:
+        nrows = st.slider('Select how many rows', 0, 1000, 100, 50)
+        st.subheader('Sample of processed data')
+        st.dataframe(data.head(nrows))
+        
 
 def main():
     """
@@ -413,7 +421,7 @@ def main():
     fig_cap.append(graph_location_heatmap(data[['LAT', 'LON']].dropna(),
                                           'Heatmap of incident locations in Los Angeles.'))
 
-    render_plots(fig_cap)
+    render_plots(fig_cap, data)
 
 
 if __name__ == '__main__':
