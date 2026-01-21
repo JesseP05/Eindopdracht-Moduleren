@@ -46,7 +46,7 @@ def location_heatmap(location_df: pd.DataFrame, title: str, caption: str = '',
     hb = ax.hexbin(x=long, y=lati, gridsize=50, cmap='inferno', mincnt=min_count, alpha=0.7)
     # Colorbar to explain density
     cb = fig.colorbar(hb, ax=ax, shrink=0.5)
-    cb.set_label('Count of Points')
+    cb.set_label('Count')
 
     # Background map
     ctx.add_basemap(ax, crs='EPSG:4326', source=ctx.providers.OpenStreetMap.Mapnik)
@@ -104,104 +104,65 @@ def simple_heatmap(
     return ax if not fig else fig
 
 
-def date_events_plot(
-    date_dict: dict[str, float],
+def date_series(
+    plot_data: pd.DataFrame,
     x_label: str,
     y_label: str,
     p_title: str,
     p_label: str,
-    average_years: bool = False,
+    heatmap_data: pd.DataFrame = None,
     tick_rotation: int = 45,
     heatmap: bool = False,
-    heatmap_avg: bool = False,
     heatmap_title: str = 'Heatmap',
+    heatmap_xlabel: str = '',
+    heatmap_ylabel: str = '',
     caption: str = '',
     r_window: int = 30,
     rolling_avg: bool = True,
     grid: bool = True
 ):
-    """Function that i should split up into parts because its a lot but im lazy.
-    Function that trivializes plotting number of events by date.
+    """Plot date series with optional heatmap.
 
     Args:
-        date_dict (dict[str, float]): Dictionary with date strings as keys
+        plot_data (pd.DataFrame): DataFrame with 'date' and 'count' columns
         x_label (str): x axis label
         y_label (str): y axis label
-        
         p_title (str): plot title
         p_label (str): plot label
-        caption (str): plot caption
-        
-        average_years (bool, optional): Whether or not to plot the average. Defaults to False.
-        
+        heatmap_data (pd.DataFrame, optional): Pivot table for heatmap. Defaults to None.
         tick_rotation (int, optional): Rotation of the tick. Defaults to 45.
-        
         heatmap (bool, optional): Whether or not to generate a heatmap. Defaults to False.
-        
-        r_window (int, optional): Window for the rolling average. Defaults to 30 (one month).
-        
-        heatmap_avg (bool, optional): Show rolling average on heatmap. Defaults to False.
-        
         heatmap_title (str, optional): Title of the heatmap plot. Defaults to 'Heatmap'.
+        caption (str, optional): plot caption. Defaults to ''.
+        r_window (int, optional): Window for the rolling average. Defaults to 30.
+        rolling_avg (bool, optional): Whether to show rolling average. Defaults to True.
         grid (bool, optional): Whether or not to show grid lines. Defaults to True.
     Returns:
-        Figure: A matplotlib figure
+        Figure: The matplotlib figure
     """
 
-    if (not average_years) and heatmap: # doesnt make sense together
-        print('Beware that heatmaps won\'t be made when average_years is set to False.')
-
-    df = pd.DataFrame(list(date_dict.items()), columns=['date', 'count'])
-    df['date'] = pd.to_datetime(df['date'])
-    df = df.sort_values(by='date')
-
-    if not average_years:
-        # regular plotting
-        fig, ax = plt.subplots()
-        ax.plot(df['date'], df['count'], label=p_label, color='skyblue', alpha=0.8)
-
-        if rolling_avg:
-            r_average = df['count'].rolling(window=r_window, center=True).mean()
-            r_label = f'{r_window}-day trend'
-            ax.plot(df['date'], r_average, label=r_label, color='navy', linewidth=2)
-        ax.set_title(p_title)
-        ax.set_xlabel(x_label)
-        ax.set_ylabel(y_label)
-        if grid:
-            ax.grid(True, which='both', linestyle='--', alpha=0.6)
-        ax.legend()
-
-        fig.text(0.5, 0.01, caption, ha='center')
-        return fig
-
-    # average over years plotting
-    df['month'] = df['date'].dt.month # month
-    df['day'] = df['date'].dt.day # dotm
-    years = df['date'].dt.year.nunique() # how many years of data (use nunique instead of unique )
-
-    daily_average = df.groupby(['month', 'day'])['count'].sum() / years # average by years
-    plot_avg = daily_average.reset_index()
-
-    # create the data
-    plot_avg['date'] = pd.to_datetime(
-        {'year':2000, 'month':plot_avg['month'], 'day':plot_avg['day']}
-    ) # 2000 dummy year
-    plot_avg = plot_avg.sort_values(by='date')
+    if heatmap and heatmap_data is None:
+        print('Warning: heatmap=True but no heatmap_data provided.')
+        heatmap = False
 
     # create the plots
-    plots = 1 if not heatmap else 2 # seperate plot for the heatmap
+    plots = 1 if not heatmap else 2
     fig, ax = plt.subplots(nrows=1, ncols=plots, figsize=(6 * plots, 6), layout='constrained')
 
-    ax[0].plot(plot_avg['date'], plot_avg['count'], label=p_label, color='skyblue', alpha=0.8)
+    # make ax a list so its indexable
+    if not heatmap:
+        ax = [ax]
+
+    ax[0].plot(plot_data['date'], plot_data['count'], label=p_label, color='skyblue', alpha=0.8)
 
     if rolling_avg:
-        r_average = plot_avg['count'].rolling(window=r_window, center=True).mean()
+        r_average = plot_data['count'].rolling(window=r_window, center=True).mean()
         r_label = f'{r_window}-day trend'
-        ax[0].plot(plot_avg['date'], r_average, label=r_label, color='navy', linewidth=2)
+        ax[0].plot(plot_data['date'], r_average, label=r_label, color='navy', linewidth=2)
 
     ax[0].set_title(p_title)
 
-    # remove dummy year again
+    # Format date axis
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
     ax[0].xaxis.set_major_locator(mdates.MonthLocator())
 
@@ -209,38 +170,22 @@ def date_events_plot(
     ax[0].set_ylabel(y_label)
 
     ax[0].tick_params(axis='x', rotation=tick_rotation)
-    plt.setp(ax[0].get_xticklabels(), ha='right', rotation_mode='anchor') # set alignment
+    plt.setp(ax[0].get_xticklabels(), ha='right', rotation_mode='anchor')
 
     if grid:
         ax[0].grid(True, which='both', linestyle='--', alpha=0.6)
     ax[0].legend()
 
     if heatmap:
-        plot_avg['Day of the week'] = plot_avg['date'].dt.day_name() # get dates weekday
-        plot_avg['Week'] = plot_avg['date'].dt.isocalendar().week # get dates week nr
-
-        # plot average structure:
-        # date, count, month, day, day_otw, week
-        if heatmap_avg:
-            plot_avg['count'] = plot_avg['count'].rolling(window=r_window, center=True).mean()
-
-        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
-        heatmap_data = plot_avg.pivot_table(index='Day of the week',
-                                            columns='Week',
-                                            values='count') # create pivot table
-
-        heatmap_data = heatmap_data.reindex(days) # re-sort
-
         simple_heatmap(heatmap_data,
-                       xlabel='Week',
-                       ylabel='Day of the week',
+                       xlabel=heatmap_xlabel,
+                       ylabel=heatmap_ylabel,
                        ax=ax[1], x_tick_step=2, heatmap_title=heatmap_title)
     fig.text(0.5, 0.001, caption, ha='center')
     return fig
 
 
-def simple_bar_plot(frequency_dict: dict[int, int],
+def simple_bar_plt(frequency_dict: dict[int, int],
     x_label: str,
     y_label: str,
     p_title: str,
@@ -257,7 +202,7 @@ def simple_bar_plot(frequency_dict: dict[int, int],
     """Makes a simple bar plot
 
     Args:
-        frequency_dict (dict[int, int]): Dictionary with a count and label
+        frequency_dict (dict[int, int]): Dictionary with a count and index
         x_label (str): Label for x axis
         y_label (str): Label for y axis
         p_title (str): Plot title
@@ -295,7 +240,7 @@ def simple_bar_plot(frequency_dict: dict[int, int],
     return fig
 
 
-def simple_line_plot(frequency_dict: dict[int, int],
+def simple_line_plt(frequency_dict: dict[int, int],
     x_label: str,
     y_label: str,
     p_title: str,
@@ -312,7 +257,7 @@ def simple_line_plot(frequency_dict: dict[int, int],
     """Makes a simple line plot
 
     Args:
-        frequency_dict (dict[int, int]): Dictionary with a count and label
+        frequency_dict (dict[int, int]): Dictionary with a count and index
         x_label (str): Label for x axis
         y_label (str): Label for y axis
         p_title (str): Plot title
@@ -352,7 +297,7 @@ def simple_line_plot(frequency_dict: dict[int, int],
     return fig
 
 
-def simple_pie_plot(frequency_dict: dict[int, int],
+def simple_pie_plt(frequency_dict: dict[int, int],
     x_label: str,
     p_title: str,
     color: list[str] = None,
@@ -365,7 +310,7 @@ def simple_pie_plot(frequency_dict: dict[int, int],
     """Makes a simple pie plot
 
     Args:
-        frequency_dict (dict[int, int]): Dictionary with a count and label
+        frequency_dict (dict[int, int]): Dictionary with a count and index
         x_label (str): Label for legend title
         p_title (str): Plot title
         color (list[str], optional): Colors of the pie. Defaults to auto.
@@ -409,11 +354,11 @@ def simple_pie_plot(frequency_dict: dict[int, int],
 
 
 class PlotType(Enum):
-    """Easily define plot types
+    """Easily define simple plot types
     """
-    BAR = simple_bar_plot
-    LINE = simple_line_plot
-    PIE = simple_pie_plot
+    BAR = simple_bar_plt
+    LINE = simple_line_plt
+    PIE = simple_pie_plt
 
 
 def plot(series: pd.Series,

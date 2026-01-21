@@ -5,6 +5,7 @@
 
 
 import os
+import pandas as pd
 
 
 class DirectoryNotFoundError(Exception):
@@ -70,6 +71,57 @@ def validate_project_structure(expected_files: set):
         print(f'Files missing: {validator}')
         raise FileNotFoundError(f'File {validator} not found..')
     print('Project structure successfully validated.')
+
+
+def calculate_yearly_average(df: pd.DataFrame):
+    """Calculate daily averages over years from date event data.
+    
+    Args:
+        df (DataFrame): DataFrame with 'date' and 'count' columns.
+    
+    Returns:
+        DataFrame: DataFrame with averaged data using a dummy year (2000).
+    """
+    df['month'] = df['date'].dt.month
+    df['day'] = df['date'].dt.day
+    years = df['date'].dt.year.nunique()
+    
+    daily_average = df.groupby(['month', 'day'])['count'].sum() / years
+    plot_avg = daily_average.reset_index()
+    
+    plot_avg['date'] = pd.to_datetime(
+        {'year': 2000, 'month': plot_avg['month'], 'day': plot_avg['day']}
+    )
+    plot_avg = plot_avg.sort_values(by='date')
+    return plot_avg
+
+
+def prepare_heatmap_data(plot_avg: pd.DataFrame, use_rolling_avg: bool = False, r_window: int = 30):
+    """Prepare data for a weekday/week heatmap.
+    
+    Args:
+        plot_avg (pd.DataFrame): DataFrame with 'date' and 'count' columns.
+        use_rolling_avg (bool, optional): Use rolling average. Defaults to False.
+        r_window (int, optional): Window size for the rolling average. Defaults to 30.
+    
+    Returns:
+        DataFrame: Table with days of week as index and weeks as columns
+    """
+    plot_avg['Day of the week'] = plot_avg['date'].dt.day_name()
+    plot_avg['Week'] = plot_avg['date'].dt.isocalendar().week
+    
+    if use_rolling_avg:
+        plot_avg['count'] = plot_avg['count'].rolling(window=r_window, center=True).mean()
+    
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
+    heatmap_data = plot_avg.pivot_table(
+        index='Day of the week',
+        columns='Week',
+        values='count'
+    )
+    heatmap_data = heatmap_data.reindex(days)
+    return heatmap_data
 
 
 if __name__ == "__main__":

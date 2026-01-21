@@ -26,24 +26,6 @@ RACE_MAPPING = {
     }
 
 
-def parse_mocodes(cell, mapping) -> str:
-    """Parses a mocode string eg: 1300 0344 1606 2032 to a list of translated mocode(s)
-
-    Args:
-        cell : pandas cell with mocodes
-        mapping: dictionary for mocode -> discription of the mocode
-
-    Returns:
-        mocodes(str): Translated values for the mocode(s)
-    """
-    if pd.isna(cell):
-        return cell
-    codes = cell.split(' ')
-    codes = [int(code) for code in codes]
-    translated = [str(mapping.get(c, c)) for c in codes]
-    mocodes = ', '.join(translated)
-    return mocodes
-
 @st.cache_data
 def process_data(files: list[str]) -> pd.DataFrame:
     """Load and process the data files.
@@ -68,7 +50,6 @@ def process_data(files: list[str]) -> pd.DataFrame:
     crim_cd_df = pd.read_csv(filepaths[1], engine='pyarrow') # translation for criminal codes
     rep_ds_df = pd.read_csv(filepaths[2], engine='pyarrow') # gives info about bureau, type of unit
     stat_cd_df = pd.read_csv(filepaths[3], engine='pyarrow') # translation for report status codes
-    # mcode_df = pd.read_csv(filepaths[4], engine='pyarrow', dtype={'MO Code': int})
 
     # Map criminal codes to classes
     crim_cd_df = crim_cd_df.drop_duplicates(subset=['Criminal Code'])
@@ -85,14 +66,6 @@ def process_data(files: list[str]) -> pd.DataFrame:
     lapd_df = helper.replace_csv_col(lapd_df, rep_ds_df, 'REPDIST', 'Rpt Dist No', 'BUREAU')
     lapd_df = helper.replace_csv_col(lapd_df, rep_ds_df, 'REPDIST', 'Authority Type', 'S_TYPE')
     lapd_df = helper.replace_csv_col(lapd_df, stat_cd_df, 'status_code', 'Status', 'description')
-
-
-    # mocode parsing is a bit harder because it can contain more than one code per cell
-    # initialize a lookup map for mocodes
-    # mocode_map = dict(zip(mcode_df['MO Code'].astype(int), mcode_df['Description']))
-
-    # parse mocodes to readable desription
-    # lapd_df['Mocodes Readable'] = lapd_df['Mocodes'].apply(parse_mocodes, args=(mocode_map,))
 
     # add racial mapping
     lapd_df['Vict Descent'] = lapd_df['Vict Descent'].map(RACE_MAPPING)
@@ -111,16 +84,28 @@ def graph_dates(dates: pd.Series, caption: str):
         tuple: (Figure, caption)
     """
     counts = dates.value_counts().sort_index()
-    dates_dict = dict(zip(counts.index.astype(str), counts.values))
-    return grapher.date_events_plot(dates_dict,
-                             x_label='Date',
-                             y_label='Avg No. of Incidents',
-                             p_title='Daily incidents by date of occurrence',
-                             p_label = 'Daily Incidents',
-                             heatmap=True,
-                             heatmap_title ='Average Daily Activity Heatmap',
-                             caption = '',
-                             average_years=True, tick_rotation=45, r_window=30), caption
+    
+    # Create DataFrame directly from Series
+    df = counts.reset_index()
+    df.columns = ['date', 'count']
+    
+    plot_avg = helper.calculate_yearly_average(df)
+    heatmap_data = helper.prepare_heatmap_data(plot_avg, use_rolling_avg=False, r_window=30)
+    
+    return grapher.date_series(
+                            plot_data=plot_avg,
+                            heatmap_data=heatmap_data,
+                            x_label='Date',
+                            y_label='Avg No. of Incidents',
+                            p_title='Daily incidents by date of occurrence',
+                            p_label='Daily Incidents',
+                            heatmap=True,
+                            heatmap_title='Average Daily Activity Heatmap',
+                            heatmap_xlabel='Week',
+                            heatmap_ylabel='Day of the week',
+                            caption='',
+                            tick_rotation=45,
+                            r_window=30), caption
 
 
 def graph_times(times: pd.Series, caption: str):
@@ -234,16 +219,16 @@ def graph_charges(charges: pd.Series, caption: str):
                              grid_direction='y'), caption
 
 
-def graph_vict_sex(sex: pd.Series, caption: str):
-    """Graphs charges as a pie chart.
+def graph_vict_sex(gender: pd.Series, caption: str):
+    """Graphs gender as a pie chart.
 
     Args:
-        sex (pd.Series): Series of sex values
+        gender (pd.Series): Series of gender values
         caption (str): Caption for the figure
     Returns:
         tuple: (Figure, caption)
     """
-    counts = sex.value_counts().sort_index()
+    counts = gender.value_counts().sort_index()
 
     colors = ['#ff9999','#66b3ff', '#99ff99'] # f,m,x
     return grapher.plot(counts,
@@ -289,11 +274,12 @@ def graph_weapons(weapons: pd.Series, caption: str, max_items: int, hide_unar: b
         weapons (pd.Series): Series of weapon description values.
         caption (str): Caption for the figure
         max_items (int): Maximum number of items to display.
-        hide_unar (bool): Whether to hide unarmed strong arm entries.
+        hide_unar (bool): Whether to hide strong arm entries.
         trun_len (int): Length to truncate weapon descriptions to.
     Returns:
         tuple: (Figure, caption)
     """
+    # strong arm is een hele grote groep en vertekent de rest, maar is wel interessant
     if hide_unar:
         weapons = weapons[weapons != 'STRONG-ARM (HANDS, FIST, FEET OR BODILY FORCE)']
 
@@ -303,7 +289,7 @@ def graph_weapons(weapons: pd.Series, caption: str, max_items: int, hide_unar: b
     return grapher.plot(counts,
                              x_label='Weapon Description',
                              y_label='Total Number of Incidents\nx1000',
-                             p_title='Incidents by Weapon Description',
+                             p_title='Weapons used in incidents',
                              tick_rotation=55,
                              color="#a8d5e2",
                              plot_type=PlotType.BAR,
@@ -326,9 +312,9 @@ def graph_report_status(statuses: pd.Series, caption: str):
     colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99','#c2c2f0','#ffb3e6','#c4e17f',
               '#f7c6c7','#b3b3b3','#ff6666','#669999','#ffb366','#b3ff66'] 
     return grapher.plot(counts,
-                            'Report Status', 
-                            'Percentage of Reports',
-                            'Status of the report distribution',
+                            'Case Status', 
+                            'Percentage of cases',
+                            'Status of the case',
                             color=colors,
                             caption='Only ~19% of reports are closed.',
                             plot_type=PlotType.PIE,
@@ -356,15 +342,20 @@ def render_plots(fig_cap: list):
     Args:
         figures (list): List of tuples containing (Figure, caption)
     """
-    st.set_page_config(layout='wide')
+    st.set_page_config(layout='centered')
     st.write('LAPD Crime Data Visualization by Jesse Postma')
+    
+    page_lyt = st.selectbox('Select page layout', ['Centered', 'Fullscreen'])
+    if page_lyt == 'Fullscreen':
+        st.set_page_config(layout='wide')
 
-    md_intro = st.checkbox('Show markdown intro', value=False)
+    md_intro = st.checkbox('Show project intro', value=False)
     if md_intro:
         with open('README.md', 'r', encoding='utf-8') as f:
             md_content = f.read()
         st.markdown(md_content, unsafe_allow_html=True)
         st.write('---')
+
     columns = st.slider('Amount of chart columns.',1,5,2,1)
     cols = st.columns(columns)
 
@@ -376,7 +367,7 @@ def render_plots(fig_cap: list):
 
 def main():
     """
-    Main Function that handles code calling and small logic.
+    Main Function that handles calling and small logic.
     """
 
     helper.validate_project_structure(set(EXPECTED_FILES))
